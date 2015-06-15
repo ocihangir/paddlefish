@@ -1,0 +1,60 @@
+<?xml version="1.0" ?>
+<Device>
+	<Version>0.1</Version>
+	<Identification>
+		<Name>ADXL345</Name>
+		<DeviceID>E5</DeviceID>
+		<Description>
+			 The ADXL345 is a small, thin, ultralow power, 3-axis accelerometer with high
+			 resolution (13-bit) measurement at up to +/-16 g. Digital output data is
+			 formatted as 16-bit twos complement and is acces-sible through either a SPI (3-
+			 or 4-wire) or I2C digital interface.  
+		</Description>
+		<Manufacturer>ADI</Manufacturer>	
+		<Category>Accelerometer</Category>
+	</Identification>
+	<Communication>
+		<Interface>I2C</Interface>
+		<Interface>SPI</Interface>
+		<I2C>
+			<DevAddressCnt>2</DevAddressCnt>
+			<DevAddress no="1">
+				<addr>3A</addr>
+				<active>1</active>
+			</DevAddress>
+			<DevAddress no="2">
+				<addr>A6</addr>
+				<active>0</active>
+			</DevAddress>
+		</I2C>
+		<SPI>
+		</SPI>
+	</Communication>
+	<Data>
+		<OutputCnt>3</OutputCnt>
+		<Measurement>mg</Measurement>
+		<Output no="1" descr="x axis" length = "2" lsb="0" res="13" register="32">X Axis</Output>
+		<Output no="2" descr="y axis" length = "2" lsb="0" res="13" register="34">Y Axis</Output>
+		<Output no="3" descr="z axis" length = "2" lsb="0" res="13" register="36">Z Axis</Output>
+	</Data>
+	<DevControl>
+		<Control type="measure" register="2D" bit="3" len="1" descr="Measure Activity">
+			<input name="measure" type="checkbox" cnt="1" def="0">
+				<val id="0">True</val>
+			</input>			
+		</Control>
+		<Control type="sleep"   register="2D" bit="2" len="1" descr="Sleep">
+			<input name="measure" type="checkbox" cnt="1" def="0">
+				<val id="0">True</val>
+			</input>				
+		</Control>
+		<Control type="wakeup"  register="2D" bit="0" len="2" descr="Wakeup Frequency(Hz)">
+			<input name="Frequency" type="combo" cnt="4" def="0">
+				<val id="0">8</val>
+				<val id="1">4</val>
+				<val id="2">2</val>
+				<val id="3">1</val>
+			</input>
+		</Control>
+	</DevControl>
+</Device>
