@@ -32,9 +32,9 @@
 	<Data>
 		<OutputCnt>3</OutputCnt>
 		<Measurement>mg</Measurement>
-		<Output no="1" descr="x axis " length = "2" lsb="0" res="13" register="32">X Axis</Output>
-		<Output no="2" descr="y axis " length = "2" lsb="0" res="13" register="34">Y Axis</Output>
-		<Output no="3" descr="z axis " length = "2" lsb="0" res="13" register="36">Z Axis</Output>
+		<Output no="1" descr="x axis" length = "2" lsb="0" res="13" register="32">X Axis</Output>
+		<Output no="2" descr="y axis" length = "2" lsb="0" res="13" register="34">Y Axis</Output>
+		<Output no="3" descr="z axis" length = "2" lsb="0" res="13" register="36">Z Axis</Output>
 	</Data>
 	<DevControl>
 		<Control type="measure" register="2D" bit="3" len="1" descr="Measure Activity">
