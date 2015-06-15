@@ -3,7 +3,6 @@
 	<Version>0.1</Version>
 	<Identification>
 		<Name>ADXL345</Name>
-		<DeviceID>E5</DeviceID>
 		<Description>
 			 The ADXL345 is a small, thin, ultralow power, 3-axis accelerometer with high
 			 resolution (13-bit) measurement at up to +/-16 g. Digital output data is
@@ -31,6 +30,10 @@
 		</SPI>
 	</Communication>
 	<Data>
+		<DeviceID>
+			<address>00</address>
+			<ID>E5</ID>
+		</DeviceID>
 		<OutputCnt>3</OutputCnt>
 		<Measurement>mg</Measurement>
 		<Output no="1" descr="x axis" length = "2" lsb="0" res="13" register="32">X Axis</Output>
@@ -45,7 +48,7 @@
 		</Control>
 		<Control type="sleep"   register="2D" bit="2" len="1" descr="Sleep">
 			<input name="measure" type="checkbox" cnt="1" def="0">
-				<val id="0">True</val>
+				<val id="0">False</val>
 			</input>				
 		</Control>
 		<Control type="wakeup"  register="2D" bit="0" len="2" descr="Wakeup Frequency(Hz)">
