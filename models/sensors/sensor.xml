@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 <Device>
+	<Version>0.1</Version>
 	<Identification>
 		<Name>ADXL345</Name>
 		<DeviceID>E5</DeviceID>
