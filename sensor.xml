@@ -12,23 +12,23 @@
 		<Manufacturer>ADI</Manufacturer>	
 		<Category>Accelerometer</Category>
 	</Identification>
-    <Communication>
-        <Interface>I2C</Interface>
-        <Interface>SPI</Interface>
-		<I2C>
-			<DevAddressCnt>2</DevAddressCnt>
-			<DevAddress no="1">
-				<addr>3A</addr>
-				<active>1</active>
-			</DevAddress>
-			<DevAddress no="2">
-				<addr>A6</addr>
-				<active>0</active>
-			</DevAddress>
-		</I2C>
-		<SPI>
-		</SPI>
-    </Communication>
+    	<Communication>
+        	<Interface>I2C</Interface>
+        	<Interface>SPI</Interface>
+			<I2C>
+				<DevAddressCnt>2</DevAddressCnt>
+				<DevAddress no="1">
+					<addr>3A</addr>
+					<active>1</active>
+				</DevAddress>
+				<DevAddress no="2">
+					<addr>A6</addr>
+					<active>0</active>
+				</DevAddress>
+			</I2C>
+			<SPI>
+			</SPI>
+    	</Communication>
 	<Data>
 		<OutputCnt>3</OutputCnt>
 		<Measurement>mg</Measurement>
