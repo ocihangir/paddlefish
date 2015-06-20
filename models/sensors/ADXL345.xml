@@ -35,29 +35,34 @@
 			<ID>E5</ID>
 		</DeviceID>
 		<OutputCnt>3</OutputCnt>
-		<Measurement>mg</Measurement>
-		<Output no="1" descr="x axis" length = "2" lsb="0" res="13" register="32">X Axis</Output>
-		<Output no="2" descr="y axis" length = "2" lsb="0" res="13" register="34">Y Axis</Output>
-		<Output no="3" descr="z axis" length = "2" lsb="0" res="13" register="36">Z Axis</Output>
+		<Unit>mg</Unit>
+		<Output no="1" descr="x axis" dataType="byte" len="2" lsb="0" res="13" register="32">X Axis</Output>
+		<Output no="2" descr="y axis" dataType="byte" len="2" lsb="0" res="13" register="34">Y Axis</Output>
+		<Output no="3" descr="z axis" dataType="byte" len="2" lsb="0" res="13" register="36">Z Axis</Output>
 	</Data>
-	<DevControl>
-		<Control type="measure" register="2D" bit="3" len="1" descr="Measure Activity">
-			<input name="measure" type="checkbox" cnt="1" def="0">
-				<val id="0">True</val>
+	<DeviceControl>
+		<Control type="powerdown" descr="Power Down the Device">
+			<input name="Power Down" type="checkbox" register="2D" bit="3" len="1" cnt="1" def="0" not="1">
+				<val id="0" def="false">Power Down</val>
 			</input>			
 		</Control>
-		<Control type="sleep"   register="2D" bit="2" len="1" descr="Sleep">
-			<input name="measure" type="checkbox" cnt="1" def="0">
-				<val id="0">False</val>
+		<Control type="measure" descr="Measure Activity">
+			<input name="measure" type="checkbox" register="2D" bit="3" len="1" def="0">
+				<val id="0" def="true">Measure</val>
+			</input>			
+		</Control>
+		<Control type="sleep" descr="Device Sleep">
+			<input name="sleep" type="checkbox" register="2D" bit="2" len="1" def="0">
+				<val id="0" def="false">Sleep</val>
 			</input>				
 		</Control>
-		<Control type="wakeup"  register="2D" bit="0" len="2" descr="Wakeup Frequency(Hz)">
-			<input name="Frequency" type="combo" cnt="4" def="0">
+		<Control type="wakeup" descr="Wakeup Frequency(Hz)">
+			<input name="Frequency" type="combo" register="2D" bit="0" len="2" cnt="4" def="0">
 				<val id="0">8</val>
 				<val id="1">4</val>
 				<val id="2">2</val>
 				<val id="3">1</val>
 			</input>
 		</Control>
-	</DevControl>
+	</DeviceControl>
 </Device>
