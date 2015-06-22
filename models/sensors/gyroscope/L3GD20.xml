@@ -47,17 +47,17 @@
 		</Control>
 		<Control type="sleep" descr="Sleep Control">
 			<input name="X Sleep" type="checkbox" register="20" bit="1" len="1" cnt="1" def="0">
-				<val id="0" def="false">X Sleep</val>
+				<val id="0">false</val>
 			</input>
 			<input name="Y Sleep" type="checkbox" register="20" bit="0" len="1" cnt="1" def="0">
-				<val id="0" def="false">Y Sleep</val>
+				<val id="0">false</val>
 			</input>
 			<input name="Z Sleep" type="checkbox" register="20" bit="2" len="1" cnt="1" def="0">
-				<val id="0" def="false">Z Sleep</val>
+				<val id="0">false</val>
 			</input>
 		</Control>
-		<Control type="ODR[Hz] - Cut-Off" descr="Output Data Rate - Cut-Off">
-			<input name="ODR[Hz] - Cut-Off" type="combo" register="20" bit="4" len="4" cnt="4" def="0">
+		<Control type="odrcutoff" descr="Output Data Rate - Cut-Off">
+			<input name="ODR[Hz] - Cut-Off" type="combo" register="20" bit="4" len="4" cnt="16" def="0">
 				<val id="0">95 - 12.5</val>
 				<val id="1">95 - 25</val>
 				<val id="2">95 - 25</val>
