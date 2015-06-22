@@ -17,11 +17,11 @@
 		<I2C>
 			<DevAddressCnt>2</DevAddressCnt>
 			<DevAddress no="1">
-				<addr>6A</addr>
+				<addr>D4</addr>
 				<active>1</active>
 			</DevAddress>
 			<DevAddress no="2">
-				<addr>6B</addr>
+				<addr>D6</addr>
 				<active>0</active>
 			</DevAddress>
 		</I2C>
@@ -34,34 +34,30 @@
 			<ID>D4</ID>
 		</DeviceID>
 		<OutputCnt>3</OutputCnt>
-		<Measurement>mg</Measurement>
-		<Output no="1" descr="x axis" length = "2" lsb="0" res="13" register="28">X Axis</Output>
-		<Output no="2" descr="y axis" length = "2" lsb="0" res="13" register="2A">Y Axis</Output>
-		<Output no="3" descr="z axis" length = "2" lsb="0" res="13" register="2C">Z Axis</Output>
+		<Unit>mg</Unit>
+		<Output no="1" descr="x axis" dataType="byte" len="2" lsb="0" res="13" register="28">X Axis</Output>
+		<Output no="2" descr="y axis" dataType="byte" len="2" lsb="0" res="13" register="2A">Y Axis</Output>
+		<Output no="3" descr="z axis" dataType="byte" len="2" lsb="0" res="13" register="2C">Z Axis</Output>
 	</Data>
-	<DevControl>
-		<Control type="powerdown" register="20" bit="3" len="1" descr="Power Down the Device">
-			<input name="Power Down" type="checkbox" cnt="1" def="0">
-				<val id="0">False</val>
+	<DeviceControl>
+		<Control type="powerdown" descr="Power Down the Device">
+			<input name="Power Down" type="checkbox" register="20" bit="3" len="1" cnt="1" def="0" not="1">
+				<val id="0" def="false">Power Down</val>
 			</input>			
 		</Control>
-		<Control type="sleep" register="20" bit="1" len="1" descr="Sleep X">
-			<input name="X Sleep" type="checkbox" cnt="1" def="0">
-				<val id="0">False</val>
-			</input>				
+		<Control type="sleep" descr="Sleep Control">
+			<input name="X Sleep" type="checkbox" register="20" bit="1" len="1" cnt="1" def="0">
+				<val id="0" def="false">X Sleep</val>
+			</input>
+			<input name="Y Sleep" type="checkbox" register="20" bit="0" len="1" cnt="1" def="0">
+				<val id="0" def="false">Y Sleep</val>
+			</input>
+			<input name="Z Sleep" type="checkbox" register="20" bit="2" len="1" cnt="1" def="0">
+				<val id="0" def="false">Z Sleep</val>
+			</input>
 		</Control>
-		<Control type="sleep" register="20" bit="0" len="1" descr="Sleep Y">
-			<input name="Y Sleep" type="checkbox" cnt="1" def="0">
-				<val id="0">False</val>
-			</input>				
-		</Control>
-		<Control type="sleep" register="20" bit="2" len="1" descr="Sleep Z">
-			<input name="Z Sleep" type="checkbox" cnt="1" def="0">
-				<val id="0">False</val>
-			</input>				
-		</Control>
-		<Control type="wakeup"  register="20" bit="4" len="4" descr="Wakeup Frequency(Hz)">
-			<input name="ODR[Hz] - Cut-Off" type="combo" cnt="4" def="0">
+		<Control type="ODR[Hz] - Cut-Off" descr="Output Data Rate - Cut-Off">
+			<input name="ODR[Hz] - Cut-Off" type="combo" register="20" bit="4" len="4" cnt="4" def="0">
 				<val id="0">95 - 12.5</val>
 				<val id="1">95 - 25</val>
 				<val id="2">95 - 25</val>
@@ -80,5 +76,5 @@
 				<val id="15">760 - 100</val>
 			</input>
 		</Control>
-	</DevControl>
+	</DeviceControl>
 </Device>

@@ -1,6 +1,11 @@
 <?xml version="1.0" ?>
+<!-- This example xml file explains how to create
+	 an xml file for a sensor device to be used in PaddleFish. 
+	 It uses Analog Devices ADXL345 Accelerometer. -->
 <Device>
+	<!-- Paddlefish XML file version -->
 	<Version>0.1</Version>
+	<!-- Identification of device for UI purposes -->
 	<Identification>
 		<Name>ADXL345</Name>
 		<Description>
@@ -12,13 +17,16 @@
 		<Manufacturer>ADI</Manufacturer>	
 		<Category>Accelerometer</Category>
 	</Identification>
+	<!-- Communication related properties -->
 	<Communication>
 		<Interface>I2C</Interface>
 		<Interface>SPI</Interface>
 		<I2C>
+			<!-- There can be more than one address for a device -->
 			<DevAddressCnt>2</DevAddressCnt>
 			<DevAddress no="1">
 				<addr>3A</addr>
+				<!-- Default address -->
 				<active>1</active>
 			</DevAddress>
 			<DevAddress no="2">
@@ -29,35 +37,60 @@
 		<SPI>
 		</SPI>
 	</Communication>
+	<!-- Data related properties -->
 	<Data>
+		<!-- DeviceID is used to check if the device is there and correct -->
 		<DeviceID>
 			<address>00</address>
 			<ID>E5</ID>
 		</DeviceID>
+		<!-- There can be several outputs -->
 		<OutputCnt>3</OutputCnt>
-		<Measurement>mg</Measurement>
-		<Output no="1" descr="x axis" length = "2" lsb="0" res="13" register="32">X Axis</Output>
-		<Output no="2" descr="y axis" length = "2" lsb="0" res="13" register="34">Y Axis</Output>
-		<Output no="3" descr="z axis" length = "2" lsb="0" res="13" register="36">Z Axis</Output>
+		<!-- Measurement unit to display -->
+		<Unit>mg</Unit>
+		<!-- For an output, we need the followings : 
+		register : the address of the register
+		dataType : the unit length (bit or byte)
+		len : the data length
+		lsb : least significant bit is first
+		res : resolution. In this case we take first 13 bits of two bytes		
+		-->
+		<Output no="1" descr="x axis" dataType="byte" len="2" lsb="0" res="13" register="32">X Axis</Output>
+		<Output no="2" descr="y axis" dataType="byte" len="2" lsb="0" res="13" register="34">Y Axis</Output>
+		<Output no="3" descr="z axis" dataType="byte" len="2" lsb="0" res="13" register="36">Z Axis</Output>
 	</Data>
-	<DevControl>
-		<Control type="measure" register="2D" bit="3" len="1" descr="Measure Activity">
-			<input name="measure" type="checkbox" cnt="1" def="0">
-				<val id="0">True</val>
+	<!-- Control of device features -->
+	<DeviceControl>
+		<!-- For a control, we need the followings : 
+		register : the address of the register
+		bit : start bit of data
+		len : the data length
+		cnt : number of control input (for combo like inputs)
+		def : default selected input
+		not : not operation to the ouput (if 1, not)
+		-->
+		<Control type="powerdown" descr="Power Down the Device">
+			<input name="Power Down" type="checkbox" register="2D" bit="3" len="1" cnt="1" def="0" not="1">
+				<val id="0" def="false">Power Down</val>
 			</input>			
 		</Control>
-		<Control type="sleep"   register="2D" bit="2" len="1" descr="Sleep">
-			<input name="measure" type="checkbox" cnt="1" def="0">
-				<val id="0">False</val>
+		<Control type="measure" descr="Measure Activity">
+			<input name="measure" type="checkbox" register="2D" bit="3" len="1" def="0">
+				<val id="0" def="true">Measure</val>
+			</input>			
+		</Control>
+		<Control type="sleep" descr="Device Sleep">
+			<input name="sleep" type="checkbox" register="2D" bit="2" len="1" def="0">
+				<val id="0" def="false">Sleep</val>
 			</input>				
 		</Control>
-		<Control type="wakeup"  register="2D" bit="0" len="2" descr="Wakeup Frequency(Hz)">
-			<input name="Frequency" type="combo" cnt="4" def="0">
+		<Control type="wakeup" descr="Wakeup Frequency(Hz)">
+			<input name="Frequency" type="combo" register="2D" bit="0" len="2" cnt="4" def="0">
 				<val id="0">8</val>
 				<val id="1">4</val>
 				<val id="2">2</val>
 				<val id="3">1</val>
 			</input>
 		</Control>
-	</DevControl>
+	</DeviceControl>
 </Device>
