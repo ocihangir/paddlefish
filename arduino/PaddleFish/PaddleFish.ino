@@ -30,6 +30,10 @@ void setup()
   // heartbeat led
   pinMode(ledb, OUTPUT);
   digitalWrite(ledb,LOW);
+  
+  char* recBuf = pfReadBytes(0x53,0x00,1);
+  Serial.print("read buffer: ");
+  Serial.println(recBuf);
 }
 
 
@@ -72,6 +76,8 @@ char* pfReadBytes(char devAddress, char regAddress, char len)
     delay(10);
   }
   Wire.endTransmission();
+  
+  return receiveBuffer;
 }
 
 /*
