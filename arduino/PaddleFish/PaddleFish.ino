@@ -5,12 +5,11 @@
 
 int ledb = 13;
 int blinkCounter = 0;
-boolean blinkToggle = false;
 
 void setup()
 {
   // initialize the serial communication:
-  Serial.begin(9600);
+  Serial.begin(115200);
 #ifdef LEONARDO
   Serial1.begin(9600);
    while (!Serial1) {
@@ -19,7 +18,7 @@ void setup()
 #endif
   
   // start i2c
-  Wire.begin();
+  //Wire.begin();
   
   // set timer to 10 milliseconds. It is constant for now.
   Timer1.initialize(10000);
@@ -30,10 +29,6 @@ void setup()
   // heartbeat led
   pinMode(ledb, OUTPUT);
   digitalWrite(ledb,LOW);
-  
-  char* recBuf = pfReadBytes(0x53,0x00,1);
-  Serial.print("read buffer: ");
-  Serial.println(recBuf);
 }
 
 
@@ -51,7 +46,9 @@ void loop()
 */
 void heartBeat()
 {
-  //char* recBuf = pfReadBytes(0x53,0x00,1);
+  char* recBuf = pfReadBytes(0x53,0x00,1);
+  Serial.print("read buffer: ");
+  Serial.println(recBuf);
   blinkLed();
 }
 
@@ -60,24 +57,93 @@ void heartBeat()
 */
 char* pfReadBytes(char devAddress, char regAddress, char len)
 {
-  static char receiveBuffer[255];
-  int i=0;
-  
-  // request data from device register
-  Wire.beginTransmission(devAddress);
-  Wire.write(regAddress);
-  Wire.endTransmission();
-  
-  // read bytes
-  Wire.requestFrom(devAddress, len);
-  while(Wire.available())
-  { 
-    receiveBuffer[i++] = Wire.read();
-    delay(10);
-  }
-  Wire.endTransmission();
+  static char receiveBuffer[16];
+
+  i2c_write(devAddress,regAddress);
+  receiveBuffer[0] = i2c_read(devAddress);
   
   return receiveBuffer;
+}
+
+char i2c_read(char devAddress)
+{
+  // start I2C
+  TWCR = (1<<TWINT) | (1<<TWSTA) |(1<<TWEN);
+  
+  // wait for command complete
+  while (!(TWCR & (1<<TWINT)));
+  
+  // check if the start was successful
+  if ((TWSR & 0xF8) != 0x08)
+    digitalWrite( ledb, HIGH); //Error
+    
+  // read address
+  char SLA_R = (devAddress << 1) | 1;
+    
+  // send address
+  TWDR = SLA_R; 
+  TWCR = (1<<TWINT) | (1<<TWEN);
+  
+  // wait for command complete
+  while (!(TWCR & (1<<TWINT)));
+  
+  // address sent successful?
+  if ((TWSR & 0xF8) != 0x40)
+    digitalWrite( ledb, HIGH); //Error
+  
+  TWCR = (1<<TWINT) | (1<<TWEN);
+
+  // wait for command complete
+  while (!(TWCR & (1<<TWINT)));
+
+  // read data successful?
+  if ((TWSR & 0xF8) != 0x58)
+    digitalWrite( ledb, HIGH); //Error
+      
+  TWCR = (1<<TWINT) | (0<<TWSTA) | (1<<TWSTO) | (1<<TWEN);
+  
+  return TWDR;
+}
+
+void i2c_write(char devAddress, char data)
+{
+  // start I2C
+  TWCR = (1<<TWINT) | (1<<TWSTA) |(1<<TWEN);
+  
+  // wait for command complete
+  while (!(TWCR & (1<<TWINT)));
+  
+  // check if the start was successful
+  if ((TWSR & 0xF8) != 0x08)
+    digitalWrite( ledb, HIGH); //Error
+    
+  // read address
+  char SLA_W = (devAddress << 1);
+    
+  // send address
+  TWDR = SLA_W; 
+  TWCR = (1<<TWINT) | (1<<TWEN);
+  
+  // wait for command complete
+  while (!(TWCR & (1<<TWINT)));
+  
+  // address sent successful?
+  if ((TWSR & 0xF8) != 0x18)
+    digitalWrite( ledb, HIGH); //Error
+    
+  TWDR = data;
+  
+  TWCR = (1<<TWINT) | (1<<TWEN);
+
+  // wait for command complete
+  while (!(TWCR & (1<<TWINT)));
+
+  // read data successful?
+  if ((TWSR & 0xF8) != 0x28)
+    digitalWrite( ledb, HIGH); //Error
+      
+  TWCR = (1<<TWINT) | (0<<TWSTA) | (1<<TWSTO) | (1<<TWEN);
+  
 }
 
 /*
@@ -90,11 +156,9 @@ void blinkLed()
 {
   if (blinkCounter>100) // the timer interrupt set to 10ms
   {
-    blinkToggle=!blinkToggle;
+    digitalWrite( ledb, digitalRead( ledb ) ^ 1 );
     blinkCounter=0;
   }
-    
-  digitalWrite(ledb,blinkToggle);
   
   blinkCounter++;
 }
