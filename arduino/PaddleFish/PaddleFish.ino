@@ -3,6 +3,11 @@
 #include <Wire.h>
 #include "TimerOne.h"
 
+#define START_CONDITION 0x00
+#define SEND_CONDITION 0x01
+#define STOP_CONDITION 0x02
+#define REPEATED_START_CONDITION 0x03
+
 int ledb = 13;
 int blinkCounter = 0;
 
@@ -11,7 +16,7 @@ void setup()
   // initialize the serial communication:
   Serial.begin(115200);
 #ifdef LEONARDO
-  Serial1.begin(9600);
+  Serial1.begin(115200);
    while (!Serial1) {
     ; // wait for Serial1 to be ready
   }
@@ -67,40 +72,24 @@ char* pfReadBytes(char devAddress, char regAddress, char len)
 
 char i2c_read(char devAddress)
 {
-  // start I2C
-  TWCR = (1<<TWINT) | (1<<TWSTA) |(1<<TWEN);
-  
-  // wait for command complete
-  while (!(TWCR & (1<<TWINT)));
-  
-  // check if the start was successful
-  if ((TWSR & 0xF8) != 0x08)
+   // start I2C
+  if (i2c_tx(START_CONDITION) != 0x08)
     digitalWrite( ledb, HIGH); //Error
     
-  // read address
+  // slave address to be written
   char SLA_R = (devAddress << 1) | 1;
     
   // send address
   TWDR = SLA_R; 
-  TWCR = (1<<TWINT) | (1<<TWEN);
-  
-  // wait for command complete
-  while (!(TWCR & (1<<TWINT)));
-  
-  // address sent successful?
-  if ((TWSR & 0xF8) != 0x40)
+  if (i2c_tx(SEND_CONDITION) != 0x40)
     digitalWrite( ledb, HIGH); //Error
   
-  TWCR = (1<<TWINT) | (1<<TWEN);
-
-  // wait for command complete
-  while (!(TWCR & (1<<TWINT)));
-
-  // read data successful?
-  if ((TWSR & 0xF8) != 0x58)
+  // read data
+  if (i2c_tx(SEND_CONDITION) != 0x58)
     digitalWrite( ledb, HIGH); //Error
       
-  TWCR = (1<<TWINT) | (0<<TWSTA) | (1<<TWSTO) | (1<<TWEN);
+  // stop
+  i2c_tx(STOP_CONDITION);
   
   return TWDR;
 }
@@ -108,42 +97,51 @@ char i2c_read(char devAddress)
 void i2c_write(char devAddress, char data)
 {
   // start I2C
-  TWCR = (1<<TWINT) | (1<<TWSTA) |(1<<TWEN);
-  
-  // wait for command complete
-  while (!(TWCR & (1<<TWINT)));
-  
-  // check if the start was successful
-  if ((TWSR & 0xF8) != 0x08)
+  if (i2c_tx(START_CONDITION) != 0x08)
     digitalWrite( ledb, HIGH); //Error
     
-  // read address
+  // slave address to be read
   char SLA_W = (devAddress << 1);
     
   // send address
   TWDR = SLA_W; 
-  TWCR = (1<<TWINT) | (1<<TWEN);
-  
-  // wait for command complete
-  while (!(TWCR & (1<<TWINT)));
-  
-  // address sent successful?
-  if ((TWSR & 0xF8) != 0x18)
+  if (i2c_tx(SEND_CONDITION) != 0x18)
     digitalWrite( ledb, HIGH); //Error
     
+  // send data
   TWDR = data;
-  
-  TWCR = (1<<TWINT) | (1<<TWEN);
-
-  // wait for command complete
-  while (!(TWCR & (1<<TWINT)));
-
-  // read data successful?
-  if ((TWSR & 0xF8) != 0x28)
+  if (i2c_tx(SEND_CONDITION) != 0x28)
     digitalWrite( ledb, HIGH); //Error
       
-  TWCR = (1<<TWINT) | (0<<TWSTA) | (1<<TWSTO) | (1<<TWEN);
+  // stop
+  i2c_tx(STOP_CONDITION);
   
+  
+}
+
+char i2c_tx(char mode)
+{
+  delay(0); // TODO: if this line is removed, the code won't work!!
+  switch(mode)
+  {
+    case START_CONDITION:
+      TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
+      break;
+    case SEND_CONDITION:
+      TWCR = (1<<TWINT) | (1<<TWEN);
+      break;
+    case STOP_CONDITION:
+      TWCR = (1<<TWINT) | (0<<TWSTA) | (1<<TWSTO) | (1<<TWEN);
+      break;
+    case REPEATED_START_CONDITION:
+      TWCR = (1<<TWINT) | (1<<TWSTA) | (0<<TWSTO) | (1<<TWEN);
+      break;
+  }   
+  
+  if (mode != STOP_CONDITION)
+    while (!(TWCR & (1<<TWINT)));// wait for command complete
+    
+  return (TWSR & 0xF8);
 }
 
 /*
