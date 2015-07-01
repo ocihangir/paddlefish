@@ -65,17 +65,16 @@ char* pfReadBytes(char devAddress, char regAddress, char len)
   static char receiveBuffer[16];
 
   i2c_write(devAddress,regAddress);
+  if (i2c_tx(REPEATED_START_CONDITION) != 0x10)
+    digitalWrite( ledb, HIGH); //Error
   receiveBuffer[0] = i2c_read(devAddress);
+  i2c_tx(STOP_CONDITION);
   
   return receiveBuffer;
 }
 
 char i2c_read(char devAddress)
 {
-   // start I2C
-  if (i2c_tx(START_CONDITION) != 0x08)
-    digitalWrite( ledb, HIGH); //Error
-    
   // slave address to be written
   char SLA_R = (devAddress << 1) | 1;
     
@@ -87,9 +86,6 @@ char i2c_read(char devAddress)
   // read data
   if (i2c_tx(SEND_CONDITION) != 0x58)
     digitalWrite( ledb, HIGH); //Error
-      
-  // stop
-  i2c_tx(STOP_CONDITION);
   
   return TWDR;
 }
@@ -111,12 +107,7 @@ void i2c_write(char devAddress, char data)
   // send data
   TWDR = data;
   if (i2c_tx(SEND_CONDITION) != 0x28)
-    digitalWrite( ledb, HIGH); //Error
-      
-  // stop
-  i2c_tx(STOP_CONDITION);
-  
-  
+    digitalWrite( ledb, HIGH); //Error      
 }
 
 char i2c_tx(char mode)
