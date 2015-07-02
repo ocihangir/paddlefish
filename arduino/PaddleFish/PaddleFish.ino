@@ -5,8 +5,9 @@
 
 #define START_CONDITION 0x00
 #define SEND_CONDITION 0x01
-#define STOP_CONDITION 0x02
-#define REPEATED_START_CONDITION 0x03
+#define SEND_CONDITION_NACK 0x02
+#define STOP_CONDITION 0x03
+#define REPEATED_START_CONDITION 0x04
 
 int ledb = 13;
 int blinkCounter = 0;
@@ -51,30 +52,29 @@ void loop()
 */
 void heartBeat()
 {
-  char* recBuf = pfReadBytes(0x53,0x00,1);
+  char* recBuf = pfReadBytes(0x53,0x32,2);
   Serial.print("read buffer: ");
-  Serial.println(recBuf);
+  Serial.println(recBuf[1],DEC);
   blinkLed();
 }
 
 /*
 * read bytes from i2c device
 */
-char* pfReadBytes(char devAddress, char regAddress, char len)
+char* pfReadBytes(char devAddress, char regAddress, char length)
 {
-  static char receiveBuffer[16];
-
   i2c_write(devAddress,regAddress);
   if (i2c_tx(REPEATED_START_CONDITION) != 0x10)
     digitalWrite( ledb, HIGH); //Error
-  receiveBuffer[0] = i2c_read(devAddress);
+  char* receiveBuffer = i2c_read(devAddress,length);
   i2c_tx(STOP_CONDITION);
   
   return receiveBuffer;
 }
 
-char i2c_read(char devAddress)
+char* i2c_read(char devAddress,char length)
 {
+  static char receiveBuffer[16];
   // slave address to be written
   char SLA_R = (devAddress << 1) | 1;
     
@@ -83,11 +83,20 @@ char i2c_read(char devAddress)
   if (i2c_tx(SEND_CONDITION) != 0x40)
     digitalWrite( ledb, HIGH); //Error
   
-  // read data
-  if (i2c_tx(SEND_CONDITION) != 0x58)
-    digitalWrite( ledb, HIGH); //Error
+  for(int dataCount=0;dataCount<length;dataCount++)
+  {
+    if ((dataCount!=length-1))
+    {
+      if (i2c_tx(SEND_CONDITION) != 0x50)
+        digitalWrite( ledb, HIGH); //Error
+    } else {
+      if (i2c_tx(SEND_CONDITION_NACK) != 0x58)
+        digitalWrite( ledb, HIGH); //Error
+    }
+    receiveBuffer[dataCount] = TWDR;
+  }
   
-  return TWDR;
+  return receiveBuffer;
 }
 
 void i2c_write(char devAddress, char data)
@@ -110,8 +119,20 @@ void i2c_write(char devAddress, char data)
     digitalWrite( ledb, HIGH); //Error      
 }
 
+/*
+* Transmit I2C command
+* Communication start with START_CONDITION
+* SEND_CONDITION transmits command following with an ACK
+* SEND_CONDITION_NACK transmits command following with a NACK
+* STOP_CONDITION stops the communication and releases I2C line
+* REPEATED_START_CONDITION starts another communication without
+* stoping the current one. It is required to read I2C device. Master
+* writes to the device address and register address first. Then,
+* after REPEATED_START_CONDITION, it listens the device.
+*/
 char i2c_tx(char mode)
 {
+  //TWCR: TWINT|TWEA|TWSTA|TWSTO|TWWC|TWEN|-|TWIE
   delay(0); // TODO: if this line is removed, the code won't work!!
   switch(mode)
   {
@@ -119,6 +140,9 @@ char i2c_tx(char mode)
       TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
       break;
     case SEND_CONDITION:
+      TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWEA);
+      break;
+    case SEND_CONDITION_NACK:
       TWCR = (1<<TWINT) | (1<<TWEN);
       break;
     case STOP_CONDITION:
@@ -129,7 +153,7 @@ char i2c_tx(char mode)
       break;
   }   
   
-  if (mode != STOP_CONDITION)
+  if ((mode != STOP_CONDITION))
     while (!(TWCR & (1<<TWINT)));// wait for command complete
     
   return (TWSR & 0xF8);
