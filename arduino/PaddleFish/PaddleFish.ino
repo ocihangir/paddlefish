@@ -1,6 +1,5 @@
 /* Paddlefish */
 
-#include <Wire.h>
 #include "TimerOne.h"
 
 #define START_CONDITION 0x00
@@ -22,10 +21,7 @@ void setup()
     ; // wait for Serial1 to be ready
   }
 #endif
-  
-  // start i2c
-  //Wire.begin();
-  
+
   // set timer to 10 milliseconds. It is constant for now.
   Timer1.initialize(10000);
   
@@ -35,6 +31,11 @@ void setup()
   // heartbeat led
   pinMode(ledb, OUTPUT);
   digitalWrite(ledb,LOW);
+  char sendData[1];
+  sendData[0]=0x02;
+  pfWriteBytes(0x53,0x31,0x01,(char*)sendData);
+  sendData[0]=0x08;
+  pfWriteBytes(0x53,0x2D,0x01,(char*)sendData);
 }
 
 
@@ -52,9 +53,9 @@ void loop()
 */
 void heartBeat()
 {
-  char* recBuf = pfReadBytes(0x53,0x32,2);
+  char* recBuf = pfReadBytes(0x53,0x32,1);
   Serial.print("read buffer: ");
-  Serial.println(recBuf[1],DEC);
+  Serial.println(recBuf[0],DEC);
   blinkLed();
 }
 
@@ -63,13 +64,28 @@ void heartBeat()
 */
 char* pfReadBytes(char devAddress, char regAddress, char length)
 {
-  i2c_write(devAddress,regAddress);
-  if (i2c_tx(REPEATED_START_CONDITION) != 0x10)
-    digitalWrite( ledb, HIGH); //Error
+  char sendData[1];
+  sendData[0]=regAddress;
+  i2c_start();
+  i2c_write(devAddress,1,(char*)sendData);
+  i2c_repeated_start();
   char* receiveBuffer = i2c_read(devAddress,length);
-  i2c_tx(STOP_CONDITION);
+  i2c_stop();
   
   return receiveBuffer;
+}
+
+void pfWriteBytes(char devAddress, char regAddress, char length, char* data)
+{
+  char sendData[length+1];
+  sendData[0]=regAddress;
+  for (int charCount = 0;charCount<length;charCount++)
+  {
+    sendData[charCount+1]=data[charCount];
+  }
+  i2c_start();
+  i2c_write(devAddress,length+1,(char*)sendData);
+  i2c_stop();
 }
 
 char* i2c_read(char devAddress,char length)
@@ -99,12 +115,8 @@ char* i2c_read(char devAddress,char length)
   return receiveBuffer;
 }
 
-void i2c_write(char devAddress, char data)
+void i2c_write(char devAddress, char length, char* data)
 {
-  // start I2C
-  if (i2c_tx(START_CONDITION) != 0x08)
-    digitalWrite( ledb, HIGH); //Error
-    
   // slave address to be read
   char SLA_W = (devAddress << 1);
     
@@ -113,11 +125,32 @@ void i2c_write(char devAddress, char data)
   if (i2c_tx(SEND_CONDITION) != 0x18)
     digitalWrite( ledb, HIGH); //Error
     
-  // send data
-  TWDR = data;
-  if (i2c_tx(SEND_CONDITION) != 0x28)
-    digitalWrite( ledb, HIGH); //Error      
+  for (int dataCount = 0; dataCount<length; dataCount++)
+  {
+    TWDR = data[0];//[dataCount];
+    if (i2c_tx(SEND_CONDITION) != 0x28)
+      digitalWrite( ledb, HIGH); //Error
+  }
 }
+
+void i2c_start()
+{
+  // start I2C
+  if (i2c_tx(START_CONDITION) != 0x08)
+    digitalWrite( ledb, HIGH); //Error
+}
+
+void i2c_stop()
+{
+  i2c_tx(STOP_CONDITION);
+}
+
+void i2c_repeated_start()
+{
+  if (i2c_tx(REPEATED_START_CONDITION) != 0x10)
+    digitalWrite( ledb, HIGH); //Error
+}
+
 
 /*
 * Transmit I2C command
