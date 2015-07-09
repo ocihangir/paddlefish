@@ -24,7 +24,7 @@ int ledb = 13;
 int blinkCounter = 0;
 
 boolean startReceive = false;
-char receivedCmd = 0x00;
+byte receivedCmd = 0x00;
 
 void setup()
 {
@@ -41,16 +41,16 @@ void setup()
   Timer1.initialize(10000);
   
   // attach timer interrupt
-  Timer1.attachInterrupt(heartBeat);
+  // Timer1.attachInterrupt(heartBeat);
   
   // heartbeat led
   pinMode(ledb, OUTPUT);
   digitalWrite(ledb,LOW);
   char sendData[1];
-  sendData[0]=0x02;
-  pfWriteBytes(0x53,0x31,0x01,(char*)sendData);
-  sendData[0]=0x08;
-  pfWriteBytes(0x53,0x2D,0x01,(char*)sendData);
+  //sendData[0]=0x02;
+  //pfWriteBytes(0x53,0x31,0x01,(char*)sendData);
+  //sendData[0]=0x04;
+  //pfWriteBytes(0x53,0x2D,0x01,(char*)sendData);
 }
 
 
@@ -60,7 +60,8 @@ void loop()
   // caution!
   // don't use interrupts
   // don't use timer1
-  
+  pfControl();
+  delay(500);
 }
 
 /*
@@ -75,18 +76,19 @@ void pfControl()
   {
     // Communication start after receiving CMD_START
     if (startReceive)
-    {      
+    {
       if (receivedCmd == CMD_NULL)
-        // Read command after communication start
+        // Read command after the communication starts
         receivedCmd = Serial.read();
-      else {
+      else {        
         switch (receivedCmd)
         {
           case CMD_READ_BYTES: /* |START|Cmd|DevAddr|RegAdd|Length|CRC|End| */
+            
             if (Serial.available() > 4)
             {
               char buffer[5];
-              Serial.readBytes(buffer,4);
+              Serial.readBytes(buffer,5);
               if (buffer[4]==CMD_END)
               {
                 // Read data from i2c device
@@ -100,6 +102,7 @@ void pfControl()
                 }
                 
                 Serial.write(CMD_END);
+                startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
                 commError();
@@ -118,34 +121,39 @@ void pfControl()
                     pfWriteBytes(buffer[0], buffer[1], buffer[2], dataBuffer);
                   else 
                     commError();
+                  receivedCmd = CMD_NULL;
+                startReceive = false;
                 } else 
                 commError();
             }
             break;
           case CMD_WRITE_BITS: /* |START|Cmd|DevAddr|RegAdd|Data|Mask|CRC|End| */
-            if (Serial.available() > 4)
+            if (Serial.available() > 5)
             {
-              char buffer[5];
-              Serial.readBytes(buffer,4);
-              if ( buffer[4] == CMD_END )
+              char buffer[6];
+              Serial.readBytes(buffer,6);
+              if ( buffer[5] == CMD_END )
               {
+                
                 char sendData[1];
                 char* recBuf = pfReadBytes(buffer[0],buffer[1],1);
-                sendData[0] = (buffer[4] & buffer[3]) | (~buffer[4] & recBuf[0]);
+                sendData[0] = (buffer[3] & buffer[2]) | (~buffer[3] & recBuf[0]);
+                Serial.write(CMD_ANSWER);
+                Serial.write(sendData[0]);
+                Serial.write(CMD_END);
                 pfWriteBytes(buffer[0], buffer[1], 1, sendData);
                 receivedCmd = CMD_NULL;
+                startReceive = false;
               } else 
                 commError();
             }
             break;
           default:
-            receivedCmd = CMD_NULL;
-            startReceive = false;
+            digitalWrite( ledb, HIGH );
+            commError();
             break;
         }
       }
-      
-      
     } else {
       if (Serial.read() == CMD_START)
         startReceive = true;
@@ -202,17 +210,17 @@ char* i2c_read(char devAddress,char length)
   // send address
   TWDR = SLA_R; 
   if (i2c_tx(SEND_CONDITION) != 0x40)
-    digitalWrite( ledb, HIGH); //Error
+    i2cError();
   
   for(int dataCount=0;dataCount<length;dataCount++)
   {
     if ((dataCount!=length-1))
     {
       if (i2c_tx(SEND_CONDITION) != 0x50)
-        digitalWrite( ledb, HIGH); //Error
+        i2cError();
     } else {
       if (i2c_tx(SEND_CONDITION_NACK) != 0x58)
-        digitalWrite( ledb, HIGH); //Error
+        i2cError();
     }
     receiveBuffer[dataCount] = TWDR;
   }
@@ -228,13 +236,13 @@ void i2c_write(char devAddress, char length, char* data)
   // send address
   TWDR = SLA_W; 
   if (i2c_tx(SEND_CONDITION) != 0x18)
-    digitalWrite( ledb, HIGH); //Error
+    i2cError();
     
   for (int dataCount = 0; dataCount<length; dataCount++)
   {
-    TWDR = data[0];//[dataCount];
+    TWDR = data[dataCount];
     if (i2c_tx(SEND_CONDITION) != 0x28)
-      digitalWrite( ledb, HIGH); //Error
+      i2cError();
   }
 }
 
@@ -242,7 +250,7 @@ void i2c_start()
 {
   // start I2C
   if (i2c_tx(START_CONDITION) != 0x08)
-    digitalWrite( ledb, HIGH); //Error
+    i2cError();
 }
 
 void i2c_stop()
@@ -253,7 +261,7 @@ void i2c_stop()
 void i2c_repeated_start()
 {
   if (i2c_tx(REPEATED_START_CONDITION) != 0x10)
-    digitalWrite( ledb, HIGH); //Error
+    i2cError();
 }
 
 
@@ -314,10 +322,16 @@ void blinkLed()
   blinkCounter++;
 }
 
+void i2cError()
+{
+  digitalWrite( ledb, HIGH );
+}
+
 void commError()
 {
   // Error in UART communication
   receivedCmd = CMD_NULL;
+  startReceive = false;
 }
 
 void disableInterrupt()
@@ -335,7 +349,7 @@ void enableInterrupt(long period)
 
 }
 
-boolean controlCommand(int length,char* buffer)
+boolean receiveBytes(int length,char* buffer)
 {
   //char buffer[5];
   Serial.readBytes(buffer,length);
