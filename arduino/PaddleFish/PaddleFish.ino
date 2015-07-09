@@ -88,8 +88,7 @@ void pfControl()
             if (Serial.available() > 4)
             {
               char buffer[5];
-              Serial.readBytes(buffer,5);
-              if (buffer[4]==CMD_END)
+              if (receiveBytes(5,buffer))
               {
                 // Read data from i2c device
                 char* recBuf = pfReadBytes(buffer[0],buffer[1],buffer[2]);
@@ -112,8 +111,7 @@ void pfControl()
             if (Serial.available() > 3)
             {
                 char buffer[4];
-                Serial.readBytes(buffer,4);
-                if ( buffer[3] == CMD_END )
+                if ( receiveBytes(4,buffer) )
                 {
                   char dataBuffer[buffer[2]];
                   Serial.readBytes(dataBuffer, buffer[2]);
@@ -131,10 +129,8 @@ void pfControl()
             if (Serial.available() > 5)
             {
               char buffer[6];
-              Serial.readBytes(buffer,6);
-              if ( buffer[5] == CMD_END )
+              if ( receiveBytes(6,buffer) )
               {
-                
                 char sendData[1];
                 char* recBuf = pfReadBytes(buffer[0],buffer[1],1);
                 sendData[0] = (buffer[3] & buffer[2]) | (~buffer[3] & recBuf[0]);
