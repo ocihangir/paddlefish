@@ -9,6 +9,7 @@
 #define STOP_CONDITION 0x03
 #define REPEATED_START_CONDITION 0x04
 
+// Communication related constants
 #define CMD_START 0xA5
 #define CMD_READ_BYTES 0xC0
 #define CMD_WRITE_BYTES 0xC1
@@ -16,6 +17,8 @@
 #define CMD_NULL 0x00
 #define CMD_END 0x0C
 #define CMD_ESC 0x0E
+
+#define CMD_ANSWER 0xA6
 
 int ledb = 13;
 int blinkCounter = 0;
@@ -60,13 +63,21 @@ void loop()
   
 }
 
+/*
+*  Receives control commands
+*  Communicates with mobile device. The communication is
+*  always started by mobile device. Arduino processes the command
+*  and answers accordingly.
+*/
 void pfControl()
 {
   while (Serial.available() > 0)
-  {          
-    if (startReceiving)
+  {
+    // Communication start after receiving CMD_START
+    if (startReceive)
     {      
       if (receivedCmd == CMD_NULL)
+        // Read command after communication start
         receivedCmd = Serial.read();
       else {
         switch (receivedCmd)
@@ -78,21 +89,37 @@ void pfControl()
               Serial.readBytes(buffer,4);
               if (buffer[4]==CMD_END)
               {
+                // Read data from i2c device
                 char* recBuf = pfReadBytes(buffer[0],buffer[1],buffer[2]);
-                // Send Data
-              }
+                
+                Serial.write(CMD_ANSWER);
+                // Send Data via UART
+                for (int dataCount = 0;dataCount<buffer[2];dataCount++)
+                {
+                  Serial.write(recBuf[dataCount]);
+                }
+                
+                Serial.write(CMD_END);
+                receivedCmd = CMD_NULL;
+              } else 
+                commError();
             }
             break;
-          case CMD_WRITE_BYTES: /* |START|Cmd|DevAddr|RegAdd|Length|Data[]|End| */
-            if (Serial.available() > 2)
+          case CMD_WRITE_BYTES: /* |START|Cmd|DevAddr|RegAdd|Length|End|Data[]|End| */
+            if (Serial.available() > 3)
             {
-              char buffer[3];
-              Serial.readBytes(buffer,3);
-              if (buffer[2]==CMD_END)
-              {
-                // TODO : implement write bytes
-                                
-              }
+                char buffer[4];
+                Serial.readBytes(buffer,4);
+                if ( buffer[3] == CMD_END )
+                {
+                  char dataBuffer[buffer[2]];
+                  Serial.readBytes(dataBuffer, buffer[2]);
+                  if ( Serial.read() == CMD_END )
+                    pfWriteBytes(buffer[0], buffer[1], buffer[2], dataBuffer);
+                  else 
+                    commError();
+                } else 
+                commError();
             }
             break;
           case CMD_WRITE_BITS: /* |START|Cmd|DevAddr|RegAdd|Data|Mask|CRC|End| */
@@ -100,18 +127,20 @@ void pfControl()
             {
               char buffer[5];
               Serial.readBytes(buffer,4);
-              if (buffer[4]==CMD_END)
+              if ( buffer[4] == CMD_END )
               {
                 char sendData[1];
                 char* recBuf = pfReadBytes(buffer[0],buffer[1],1);
                 sendData[0] = (buffer[4] & buffer[3]) | (~buffer[4] & recBuf[0]);
-                pfWriteBytes(buffer[0], buffer[1], 1, sendData)
-              }
+                pfWriteBytes(buffer[0], buffer[1], 1, sendData);
+                receivedCmd = CMD_NULL;
+              } else 
+                commError();
             }
             break;
-          case default:
+          default:
             receivedCmd = CMD_NULL;
-            startReceiving = false;
+            startReceive = false;
             break;
         }
       }
@@ -119,7 +148,7 @@ void pfControl()
       
     } else {
       if (Serial.read() == CMD_START)
-        startReceiving = true;
+        startReceive = true;
     }
   }
 }
@@ -283,4 +312,36 @@ void blinkLed()
   }
   
   blinkCounter++;
+}
+
+void commError()
+{
+  // Error in UART communication
+  receivedCmd = CMD_NULL;
+}
+
+void disableInterrupt()
+{
+  /*Timer1.detachInterrupt();
+  Timer1.stop();*/
+}
+
+void enableInterrupt(long period)
+{
+  /*Timer1.initialize(period);
+  
+  // attach timer interrupt
+  Timer1.attachInterrupt(heartBeat);*/
+
+}
+
+boolean controlCommand(int length,char* buffer)
+{
+  //char buffer[5];
+  Serial.readBytes(buffer,length);
+  if ( buffer[length-1] == CMD_END )
+    return true;
+  
+  return false;
+  
 }
