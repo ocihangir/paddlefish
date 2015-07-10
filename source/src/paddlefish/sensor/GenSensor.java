@@ -2,8 +2,6 @@ package paddlefish.sensor;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;

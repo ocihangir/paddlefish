@@ -2,6 +2,10 @@
 
 #include "TimerOne.h"
 
+//#define LEONARDO 1
+
+#define BAUDRATE 115200
+
 // I2C related constants
 #define START_CONDITION 0x00
 #define SEND_CONDITION 0x01
@@ -29,9 +33,9 @@ byte receivedCmd = 0x00;
 void setup()
 {
   // initialize the serial communication:
-  Serial.begin(115200);
+  Serial.begin(BAUDRATE);
 #ifdef LEONARDO
-  Serial1.begin(115200);
+  Serial1.begin(BAUDRATE);
    while (!Serial1) {
     ; // wait for Serial1 to be ready
   }
