@@ -69,14 +69,38 @@ void loop()
 *  Communicates with mobile device. The communication is
 *  always started by mobile device. Arduino processes the command
 *  and answers accordingly.
+*  Examples :
+* CMD_READ_BYTES:
+* |START|Cmd|DevAddr|RegAdd|Length|CRC|End|
+  
+  Read ID
+  A5 C0 53 00 01 00 0C
+
+  Read 3 axis 16bit data
+  A5 C0 53 32 06 00 0C
+
+* CMD_WRITE_BYTES: 
+* |START|Cmd|DevAddr|RegAdd|Length|End|Data[]|End|
+  
+  Set measure mode (write bytes command)
+  A5 C1 53 2D 01 0C 08 0C
+  
+* CMD_WRITE_BITS: 
+* |START|Cmd|DevAddr|RegAdd|Data|Mask|CRC|End|
+
+  Set measure mode (write bit command)
+  A5 C2 53 2D 08 FF 00 0C
 */
 void pfControl()
 {
   while (Serial.available() > 0)
   {
     // Communication start after receiving CMD_START
-    if (startReceive)
+    if (!startReceive)
     {
+      if (Serial.read() == CMD_START)
+        startReceive = true;
+    } else {
       if (receivedCmd == CMD_NULL)
         // Read command after the communication starts
         receivedCmd = Serial.read();
@@ -145,14 +169,10 @@ void pfControl()
             }
             break;
           default:
-            digitalWrite( ledb, HIGH );
             commError();
             break;
         }
       }
-    } else {
-      if (Serial.read() == CMD_START)
-        startReceive = true;
     }
   }
 }
