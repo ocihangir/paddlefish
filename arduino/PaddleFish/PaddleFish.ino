@@ -55,6 +55,9 @@ void setup()
   //pfWriteBytes(0x53,0x31,0x01,(char*)sendData);
   //sendData[0]=0x04;
   //pfWriteBytes(0x53,0x2D,0x01,(char*)sendData);
+  
+  TWBR = 0x1F; // TODO : i2c speed slowed down to below 400KHz for eeprom
+  
 }
 
 
