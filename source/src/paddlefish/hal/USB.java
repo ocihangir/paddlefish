@@ -59,13 +59,14 @@ public class USB{
 	{
 		byte[] res = new byte[1024];
 		byte[] buffer = new byte[1024];
-		int len = 1;
+		int len = 0;
 		int prev_len = 0;
-		while( buffer[len-1] != 0x0C ) {
+		do 
+		{
 			len = this.in.read( buffer );
 			System.arraycopy(buffer, 0, res, prev_len, len);
 			prev_len+=len;
-		}
+		} while( res[prev_len-1] != 0x0C );
 		return res;
 	}
 	
