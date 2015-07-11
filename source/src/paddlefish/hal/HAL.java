@@ -7,7 +7,7 @@ public class HAL {
 	USB usbComm;
 	public HAL() throws Exception
 	{
-		usbComm = new USB("/dev/ttyACM0",115200);
+		usbComm = new USB("/dev/ttyACM1",115200);
 	}
 	
 	public void txData(char data[]) throws IOException

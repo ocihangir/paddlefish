@@ -195,6 +195,96 @@ public class CommunicationTester {
 		return true;
 	}
 	
+	
+	public static boolean testEEPROMReadWriteMultiBytes() throws IOException, InterruptedException
+	{
+		System.out.println("-Testing EEPROM reading and writing multiple bytes-");
+		
+		System.out.println("Reading multiple addresses 0x1E 0x1F 0x20...");
+		testReadBytes((char)0x50, (char)0x00, 3);
+		
+		Thread.sleep(300);
+		
+		char[] data = {0x55, 0x55, 0x55};
+		System.out.println("Writing 0x55 to 0x1E 0x1F 0x20 address...");
+		testWriteMultiBytes((char)0x50, (char)0x00, data);
+		
+		Thread.sleep(300);
+		
+		System.out.println("Reading multiple addresses 0x1E 0x1F 0x20...");
+		byte[] res = testReadBytes((char)0x50, (char)0x00, 3);
+		
+		
+		
+		if ((res[0] & 0xFF) != CommConstants.CMD_ANSWER)
+		{
+			System.out.print("Answer start byte is wrong!");
+			return false;
+		}
+		if (res[1] != 0x55)
+		{
+			System.out.print("Written and read data don't match!");
+			return false;
+		}
+		if (res[2] != 0x55)
+		{
+			System.out.print("Written and read data don't match!");
+			return false;
+		}
+		if (res[3] != 0x55)
+		{
+			System.out.print("Written and read data don't match!");
+			return false;
+		}
+		if ((res[4] & 0xFF) != CommConstants.CMD_END)
+		{
+			System.out.print("Answer end byte wrong!");
+			return false;
+		}
+		
+		Thread.sleep(300);
+		
+		char[] data2 = {0x00, 0x00, 0x00};
+		System.out.println("Writing 0x00 to 0x1E 0x1F 0x20 address...");
+		testWriteMultiBytes((char)0x50, (char)0x00, data2);
+		
+		Thread.sleep(300);
+		
+		System.out.println("Reading multiple addresses 0x1E 0x1F 0x20...");
+		res = testReadBytes((char)0x50, (char)0x00, 3);
+		
+		if ((res[0] & 0xFF) != CommConstants.CMD_ANSWER)
+		{
+			System.out.print("Answer start byte is wrong!");
+			return false;
+		}
+		if (res[1] != 0x00)
+		{
+			System.out.print("Written and read data don't match!");
+			return false;
+		}
+		if (res[2] != 0x00)
+		{
+			System.out.print("Written and read data don't match!");
+			return false;
+		}
+		if (res[3] != 0x00)
+		{
+			System.out.print("Written and read data don't match!");
+			return false;
+		}
+		if ((res[4] & 0xFF) != CommConstants.CMD_END)
+		{
+			System.out.print("Answer end byte wrong!");
+			return false;
+		}
+		
+		System.out.println("\n");
+		
+		return true;
+	}
+	
+	
 	public static void main(String[] args) throws Exception
 	{
 		commCont = new CommController();
@@ -207,6 +297,10 @@ public class CommunicationTester {
 		tst &= testReadWriteSingleByte();
 		
 		tst &= testReadWriteMultiBytes();
+		
+		Thread.sleep(100);
+		
+		tst &= testEEPROMReadWriteMultiBytes();
 		
 		if (tst)
 			System.out.print("Communication test - OK!");
