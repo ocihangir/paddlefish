@@ -57,9 +57,16 @@ public class USB{
 	
 	public byte[] receiveData() throws IOException
 	{
-		byte[] buffer = new byte[ 1024 ];
-		this.in.read(buffer);
-		return buffer;
+		byte[] res = new byte[1024];
+		byte[] buffer = new byte[1024];
+		int len = 1;
+		int prev_len = 0;
+		while( buffer[len-1] != 0x0C ) {
+			len = this.in.read( buffer );
+			System.arraycopy(buffer, 0, res, prev_len, len);
+			prev_len+=len;
+		}
+		return res;
 	}
 	
 	public static class SerialReader implements Runnable {
