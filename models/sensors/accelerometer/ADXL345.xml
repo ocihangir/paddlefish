@@ -18,11 +18,11 @@
 		<I2C>
 			<DevAddressCnt>2</DevAddressCnt>
 			<DevAddress no="1">
-				<addr>3A</addr>
+				<addr>53</addr>
 				<active>1</active>
 			</DevAddress>
 			<DevAddress no="2">
-				<addr>A6</addr>
+				<addr>3A</addr>
 				<active>0</active>
 			</DevAddress>
 		</I2C>
