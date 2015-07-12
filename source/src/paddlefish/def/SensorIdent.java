@@ -16,8 +16,8 @@ public class SensorIdent
 	public String descr;
 	public String manuf;
 	public SensorCategory categ;
-	public int deviceIDAddress;
-	public int deviceID;
+	public byte deviceIDAddress;
+	public byte deviceID;
 	public int outputCnt;
 	public SensorMeasurement unit;
 	

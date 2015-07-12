@@ -14,6 +14,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.sun.jndi.cosnaming.IiopUrl.Address;
+
 import paddlefish.comm.I2CComm;
 import paddlefish.comm.SPIComm;
 import paddlefish.def.ControlInput;
@@ -125,7 +127,7 @@ public class SensorXMLReader
         // if successfully read from file
         if(addr!=-1 && active!=-1)
         {
-        	i2cInf.addDeviceAddr(addr, (active==1));
+        	i2cInf.addDeviceAddr((byte)(addr&0xff), (active==1));
         }
 	}
 	// Part of communication info
@@ -244,8 +246,8 @@ public class SensorXMLReader
         // if successfully read from file
         if(addr!=-1 && id!=-1)
         {
-        	this.identInfo.deviceID = id;
-        	this.identInfo.deviceIDAddress = addr;
+        	this.identInfo.deviceID = (byte)(id&0xff);
+        	this.identInfo.deviceIDAddress = (byte)(addr&0xff);
         }
         //TODO: Log
         else
@@ -266,7 +268,8 @@ public class SensorXMLReader
 			output.lsb = tryParse(((Element) outputInfo).getAttribute("lsb"));
 			output.res= tryParse(((Element) outputInfo).getAttribute("res"));
 			// read hexadecimal as decimal!
-			output.register = Integer.parseInt(((Element) outputInfo).getAttribute("register"), 16);
+			int intReg = Integer.parseInt(((Element) outputInfo).getAttribute("register"), 16);
+			output.register = (byte) (intReg&0xff);	
 			// add to list
 			outputLst.add(output);
 		}else
@@ -321,7 +324,8 @@ public class SensorXMLReader
 			// read interface type
 			cIn.interfaceType = ((Element) controlIn).getAttribute("type");
 			// read register (read as hexadecimal but kept as decimal)
-			cIn.register =  Integer.parseInt(((Element) controlIn).getAttribute("register"),16);
+			int intReg = Integer.parseInt(((Element) controlIn).getAttribute("register"),16);					
+			cIn.register = (byte) (intReg&0xff);
 			// read bit
 			cIn.bit = tryParse(((Element) controlIn).getAttribute("bit"));
 			// read length

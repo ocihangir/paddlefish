@@ -18,7 +18,7 @@ import paddlefish.def.SensorOutput;
 import paddlefish.sensor.ADXL345;
 
 public class Tester {
-
+	
 	private void testIdentificationInfo(SensorIdent ident)
 	{
 		System.out.println("IDENTIFICATION INFO");
@@ -75,11 +75,12 @@ public class Tester {
 		}
 	}
 	
-	public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException 
+	public static void main(String[] args) throws Exception 
 	{
 		// TODO Auto-generated method stub
 		// Assume we have added ADXL345
 		ADXL345 adSens = new ADXL345(SensorCategory.ACC, "ADXL345");
+		
 		Tester test = new Tester();
 		test.testIdentificationInfo(adSens.getIdentInfo());
 		test.testCommunicationInfo(adSens.getI2cInf(), adSens.getSpiInf());

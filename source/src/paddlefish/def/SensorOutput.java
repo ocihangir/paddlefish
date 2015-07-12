@@ -21,7 +21,7 @@ public class SensorOutput
 	// resolution in bits
 	public int res;
 	// address of the register where the output will be read
-	public int register;
+	public byte register;
 	// data type of output
 	public String dType;
 	

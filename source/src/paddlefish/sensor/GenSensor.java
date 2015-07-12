@@ -2,6 +2,7 @@ package paddlefish.sensor;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
@@ -13,6 +14,7 @@ import paddlefish.def.SensorControl;
 import paddlefish.def.SensorIdent;
 import paddlefish.def.SensorOutput;
 import paddlefish.io.SensorXMLReader;
+import paddlefish.protocol.CommController;
 
 public abstract class GenSensor {
 	// identification data read from XML file
@@ -78,11 +80,14 @@ public abstract class GenSensor {
 	
 	/*******
 	 * Abstract Methods
+	 * @throws InterruptedException 
+	 * @throws IOException 
+	 * @throws Exception 
 	 ******/
 	// Power Down request from interface
-	public abstract boolean powerDown();
+	public abstract boolean powerDown() throws IOException, InterruptedException, Exception;
 	// Power Up request from interface
-	public abstract boolean powerUp();
+	public abstract boolean powerUp() throws IOException, InterruptedException, Exception;
 	// Read the value of the sensor continuously
 	public abstract void getStreamData();
 	//TODO: Imagine more...

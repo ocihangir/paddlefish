@@ -174,7 +174,7 @@ public class CommunicationTester
 		return true;
 	}	
 	
-	public static boolean testADXL345ID() throws IOException, InterruptedException, SAXException, ParserConfigurationException
+	public static boolean testADXL345ID() throws Exception
 	{
 		System.out.println("-Testing reading ADXL345 ID-");
 		
@@ -184,7 +184,7 @@ public class CommunicationTester
 		
 		char hexAdd = (char) (adSens.getI2cInf().getActiveDeviceAddr()&0xff);
 		char devIdAdd =  (char) (adSens.getIdentInfo().deviceIDAddress&0xff);
-		byte devId = (byte) (adSens.getIdentInfo().deviceID&0xff);
+		byte devId = adSens.getIdentInfo().deviceID;
 		
 		byte[] res = testReadBytes(hexAdd, devIdAdd, 1);
 		
@@ -209,6 +209,29 @@ public class CommunicationTester
 		return true;
 	}
 	
+	
+	public static boolean testPower(CommController com) throws Exception
+	{
+		System.out.println("-Testing Power ADXL345-");
+		
+		ADXL345 adSens = new ADXL345(SensorCategory.ACC, "ADXL345");
+		
+		char hexAdd = (char) (adSens.getI2cInf().getActiveDeviceAddr()&0xff);
+		
+		byte[] sensorVal = testReadBytes(hexAdd, (char) 0x32, 0x06);
+
+		adSens.powerDown();
+		Thread.sleep(1000);
+		adSens.powerUp();
+		sensorVal = testReadBytes(hexAdd, (char) 0x32, 0x06);
+		adSens.powerDown();
+		Thread.sleep(1000);
+		sensorVal = testReadBytes(hexAdd, (char) 0x32, 0x06);
+		
+		System.out.println("\n");
+		
+		return true;
+	}
 	
 	public static boolean testEEPROMReadWriteMultiBytes() throws IOException, InterruptedException
 	{
@@ -302,20 +325,22 @@ public class CommunicationTester
 	public static void main(String[] args) throws Exception
 	{
 		/* */
-		commCont = new CommController();
+		commCont = CommController.getInstance();
 		try {Thread.sleep(2000);} catch (InterruptedException ie) {} // Wait for communication channel is up
 		
 		boolean tst = true;
 		
-		tst &= testADXL345ID();
+		//tst &= testADXL345ID();
 		
-		tst &= testReadWriteSingleByte();
+		//tst &= testReadWriteSingleByte();
 		
-		tst &= testReadWriteMultiBytes();
+		//tst &= testReadWriteMultiBytes();
 		
 		Thread.sleep(100);
 		
 		tst &= testEEPROMReadWriteMultiBytes();
+		
+		tst&= testPower(commCont);
 		
 		commCont.close();
 		

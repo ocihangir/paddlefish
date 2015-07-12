@@ -5,13 +5,30 @@ import java.io.IOException;
 import paddlefish.hal.HAL;
 import paddlefish.protocol.CommConstants;
 
-public class CommController {
-	HAL hal;
-	public CommController() throws Exception
-	{
-		 hal = new HAL();
-	}
+
+/*Singleton class Pattern is used*/
+public class CommController 
+{
+	private static CommController instance = null;
+	private static HAL hal;
 	
+	protected CommController() throws Exception 
+	{
+		// Exists only to defeat instantiation.
+		//http://www.javaworld.com/article/2073352/core-java/simply-singleton.html
+		 if(hal==null)
+			hal = new HAL();
+	}
+	   
+
+    public static CommController getInstance() throws Exception {
+	      if(instance == null) 
+	      {
+	         instance = new CommController();
+	      }
+	      return instance;
+	}
+	   
 	public char[] readByteArray(char deviceAddress, char registerAddress, int length) throws IOException, InterruptedException
 	{
 		char cmd[] = new char[7];

@@ -18,7 +18,7 @@ public class ControlInput
 	// X Sleep, Y Sleep , ODR[Hz] - Cut-Off etc...
 	public String name;
 	//register for this control
-	public int register;
+	public byte register;
 	// which bit?
 	public int bit;
 	// length of control
