@@ -6,7 +6,8 @@ import paddlefish.protocol.CommController;
 
 import paddlefish.protocol.CommConstants;
 
-public class CommunicationTester {
+public class CommunicationTester 
+{
 	static CommController commCont;
 	public static byte[] testReadBytes(char deviceAddress, char registerAddress, int length) throws IOException, InterruptedException
 	{
@@ -301,6 +302,8 @@ public class CommunicationTester {
 		Thread.sleep(100);
 		
 		tst &= testEEPROMReadWriteMultiBytes();
+		
+		commCont.close();
 		
 		if (tst)
 			System.out.print("Communication test - OK!");

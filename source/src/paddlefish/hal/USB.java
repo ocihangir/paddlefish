@@ -11,28 +11,36 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 
-public class USB{
+public class USB
+{
 	InputStream in;
 	OutputStream out;
 
+	CommPort commPort;
+	
 	public USB(String portName, int baudRate) throws Exception
-	{
+	{	
 		connect(portName, baudRate);
 	}
 	
 	/*
 	 * Connect to the serial port and hold it
 	 */
-	void connect( String portName, int baudRate ) throws Exception {
+	void connect( String portName, int baudRate ) throws Exception 
+	{
 	    CommPortIdentifier portIdentifier = CommPortIdentifier
 	        .getPortIdentifier( portName );
-	    if( portIdentifier.isCurrentlyOwned() ) {
+	    if( portIdentifier.isCurrentlyOwned() ) 
+	    {
 	      System.out.println( "Error: Port is currently in use" );
-	    } else {
+	    } 
+	    else 
+	    {
 	      int timeout = 2000;
-	      CommPort commPort = portIdentifier.open( this.getClass().getName(), timeout );
+	      commPort = portIdentifier.open( this.getClass().getName(), timeout );
 	 
-	      if( commPort instanceof SerialPort ) {
+	      if( commPort instanceof SerialPort ) 
+	      {
 	        SerialPort serialPort = ( SerialPort )commPort;
 	        serialPort.setSerialPortParams( baudRate,
 	                                        SerialPort.DATABITS_8,
@@ -41,11 +49,22 @@ public class USB{
 	 
 	        in = serialPort.getInputStream();
 	        out = serialPort.getOutputStream();
-	      } else {
+	      }
+	      else 
+	      {
 	        System.out.println( "Error: Only serial ports are handled by this example." );
 	      }
 	    }
 	  }
+	
+	public void close()
+	{
+		if(this.commPort!=null)
+			this.commPort.close();
+		//TODO: Log
+		else
+			System.out.println("No CommPort available");
+	}
 	
 	public void sendData(char[] data) throws IOException
 	{
@@ -61,12 +80,21 @@ public class USB{
 		byte[] buffer = new byte[1024];
 		int len = 0;
 		int prev_len = 0;
+		boolean loop = true;
 		do 
 		{
 			len = this.in.read( buffer );
 			System.arraycopy(buffer, 0, res, prev_len, len);
 			prev_len+=len;
-		} while( res[prev_len-1] != 0x0C );
+			
+			if (prev_len>0)
+			{
+				if (res[prev_len-1] == 0x0C)
+				{
+					loop = false;
+				}
+			}
+		} while( loop );
 		return res;
 	}
 	

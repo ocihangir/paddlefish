@@ -85,4 +85,15 @@ public class CommController {
 		
 		//return receivedData;
 	}
+
+	public void close()
+	{
+		if(hal!=null)
+		{
+			hal.close();
+		}
+		//TODO: Log
+		else
+			System.out.println("No HAL available");
+	}
 }
