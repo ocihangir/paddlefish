@@ -1,6 +1,8 @@
 package paddlefish.comm;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Objects;
 
 
 public class I2CComm {
@@ -52,6 +54,26 @@ public class I2CComm {
 		{
 			devAddrInf.put(addr, isActive);
 		}
+	}
+	
+	/* Only one of the device addresses is active. Get the adress of the active one */
+	public Integer getActiveDeviceAddr()
+	{
+		if(this.devAddrInf!=null)
+		{
+		    for (Entry<Integer, Boolean> entry : devAddrInf.entrySet()) 
+		    {
+		        if (Objects.equals(true, entry.getValue())) 
+		        {
+		            return entry.getKey();
+		        }
+		    }
+		    //TODO:Log
+		    System.out.println("No active device address found");
+		}
+		//TODO:Log
+		System.out.println("Device Info is not available");
+		return null;
 	}
 	
 }
