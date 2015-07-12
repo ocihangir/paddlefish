@@ -43,7 +43,15 @@ public class SensorXMLReader
 	
 	public SensorXMLReader(SensorCategory c, String devname) 
 	{
-		String filename = System.getProperty("java.class.path")+"\\"+modelPath+"\\"+c.getFolderName()+"\\"+devname+".xml";
+		String classPaths = System.getProperty("java.class.path");
+		String[] classpathEntries = classPaths.split(File.pathSeparator);
+		String buildPath = "";
+		for(String str:classpathEntries)
+		{
+			if(str.endsWith("bin"))
+				buildPath = str;
+		}
+		String filename = buildPath+"\\"+modelPath+"\\"+c.getFolderName()+"\\"+devname+".xml";
 		System.out.println(filename);
 		this.fName=filename;
 		identInfo = new SensorIdent();
