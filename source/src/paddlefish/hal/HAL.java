@@ -9,9 +9,9 @@ public class HAL {
 	public HAL() throws Exception
 	{
 		// Linux - Ubuntu
-		//usbComm = new USB("/dev/ttyACM1",115200);
+		usbComm = new USB("/dev/ttyACM2",115200);
 		// Windows
-		usbComm = new USB("COM4",115200);
+		//usbComm = new USB("COM4",115200);
 	}
 	
 	public void txData(char data[]) throws IOException

@@ -1,7 +1,8 @@
 package paddlefish.io;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -13,8 +14,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import com.sun.jndi.cosnaming.IiopUrl.Address;
 
 import paddlefish.comm.I2CComm;
 import paddlefish.comm.SPIComm;
@@ -45,15 +44,8 @@ public class SensorXMLReader
 	
 	public SensorXMLReader(SensorCategory c, String devname) 
 	{
-		String classPaths = System.getProperty("java.class.path");
-		String[] classpathEntries = classPaths.split(File.pathSeparator);
-		String buildPath = "";
-		for(String str:classpathEntries)
-		{
-			if(str.endsWith("bin"))
-				buildPath = str;
-		}
-		String filename = buildPath+"\\"+modelPath+"\\"+c.getFolderName()+"\\"+devname+".xml";
+		String filename = "/models/sensors/"+c.getFolderName()+"/"+devname+".xml";
+		
 		System.out.println(filename);
 		this.fName=filename;
 		identInfo = new SensorIdent();
@@ -407,7 +399,7 @@ public class SensorXMLReader
 		}		
 	}
 	
-	public void readFile() throws SAXException, IOException, ParserConfigurationException
+	public void readFile() throws SAXException, IOException, ParserConfigurationException, URISyntaxException
 	{
 	    DocumentBuilderFactory factory = 
 		        DocumentBuilderFactory.newInstance();
@@ -415,7 +407,7 @@ public class SensorXMLReader
 	    DocumentBuilder builder = factory.newDocumentBuilder();
 	    //Load and Parse the XML document
 	    //document contains the complete XML as a Tree.
-	    File xmlFile = new File(this.fName);
+	    InputStream xmlFile = getClass().getResourceAsStream(this.fName);
 	    
 	    Document curDocument = 
 	      builder.parse(xmlFile);
@@ -480,7 +472,7 @@ public class SensorXMLReader
 		 }
 	}
 	
-	public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException  
+	public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException, URISyntaxException  
 	{		
 		/* TEST */
 		SensorXMLReader reader = new SensorXMLReader(SensorCategory.ACC, "ADXL345");

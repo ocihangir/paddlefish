@@ -1,6 +1,7 @@
 package paddlefish.sensor;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -14,7 +15,6 @@ import paddlefish.def.SensorControl;
 import paddlefish.def.SensorIdent;
 import paddlefish.def.SensorOutput;
 import paddlefish.io.SensorXMLReader;
-import paddlefish.protocol.CommController;
 
 public abstract class GenSensor {
 	// identification data read from XML file
@@ -32,7 +32,7 @@ public abstract class GenSensor {
 	// ? we need a thread for this
 	protected double curValue;
 	
-	private void initFromXML(SensorCategory c, String devname) throws SAXException, IOException, ParserConfigurationException
+	private void initFromXML(SensorCategory c, String devname) throws SAXException, IOException, ParserConfigurationException, URISyntaxException
 	{
 		SensorXMLReader reader = new SensorXMLReader(c, devname);
 		reader.readFile();
@@ -43,7 +43,7 @@ public abstract class GenSensor {
 		this.controlLst = reader.getControlLst();
 	}
 	
-	public GenSensor(SensorCategory c, String devname) throws SAXException, IOException, ParserConfigurationException
+	public GenSensor(SensorCategory c, String devname) throws SAXException, IOException, ParserConfigurationException, URISyntaxException
 	{
 		this.identInfo = new SensorIdent();
 		this.outputLst = new ArrayList<SensorOutput>();

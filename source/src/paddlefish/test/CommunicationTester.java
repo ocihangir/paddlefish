@@ -330,11 +330,11 @@ public class CommunicationTester
 		
 		boolean tst = true;
 		
-		//tst &= testADXL345ID();
+		tst &= testADXL345ID();
 		
-		//tst &= testReadWriteSingleByte();
+		tst &= testReadWriteSingleByte();
 		
-		//tst &= testReadWriteMultiBytes();
+		tst &= testReadWriteMultiBytes();
 		
 		Thread.sleep(100);
 		

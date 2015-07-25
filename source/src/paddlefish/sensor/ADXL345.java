@@ -1,11 +1,5 @@
 package paddlefish.sensor;
 
-import java.io.IOException;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
-
 import paddlefish.def.ControlType;
 import paddlefish.def.SensorCategory;
 import paddlefish.def.SensorControl;
