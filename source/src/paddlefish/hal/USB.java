@@ -5,6 +5,7 @@ package paddlefish.hal;
 
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
+import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +21,8 @@ public class USB
 	
 	public USB(String portName, int baudRate) throws Exception
 	{	
+		System.setProperty("gnu.io.rxtx.SerialPorts", portName); // A hack for rxtx cannot find ttyACMx ports on linux. See https://bugs.launchpad.net/ubuntu/+source/rxtx/+bug/367833
+		listPorts();
 		connect(portName, baudRate);
 	}
 	
@@ -138,4 +141,56 @@ public class USB
 	      }
 	    }
 	  }
+	  
+	  private static String getPortTypeName ( int portType )
+	    {
+	        switch ( portType )
+	        {
+	        case CommPortIdentifier.PORT_I2C:
+	            return "I2C";
+	        case CommPortIdentifier.PORT_PARALLEL:
+	            return "Parallel";
+	        case CommPortIdentifier.PORT_RAW:
+	            return "Raw";
+	        case CommPortIdentifier.PORT_RS485:
+	            return "RS485";
+	        case CommPortIdentifier.PORT_SERIAL:
+	            return "Serial";
+	        default:
+	            return "unknown type";
+	        }
+	    }
+	  
+	  private static void listPorts()
+	    {
+		  SerialPort serialPort;
+		  
+	        @SuppressWarnings("unchecked")
+	        java.util.Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
+
+	        while ( portEnum.hasMoreElements() ) 
+	        {
+	            CommPortIdentifier portIdentifier = portEnum.nextElement();
+	            System.out.print(portIdentifier.getName()  +  " - " +  getPortTypeName(portIdentifier.getPortType()) );           
+
+	            if ((portIdentifier.getPortType() == 1) && getPortTypeName(portIdentifier.getPortType()) == "Serial")
+	            {
+	                try
+	                {
+	                    serialPort =  (SerialPort) portIdentifier.open(portIdentifier.getName(), 3000);
+	                }
+	                catch (PortInUseException e)
+	                {
+	                    System.err.print("port in use");
+	                    continue;
+	                }
+
+	                System.out.print(" - Baud is " + serialPort.getBaudRate());    
+	                System.out.print(" - Bits is " + serialPort.getDataBits());    
+	                System.out.print(" - Stop is " + serialPort.getStopBits());    
+	                System.out.println(" - Par is " + serialPort.getParity());
+	                serialPort.close();
+	            }
+	        }
+	    }
 }
