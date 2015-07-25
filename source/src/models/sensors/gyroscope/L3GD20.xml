@@ -1,0 +1,80 @@
+<?xml version="1.0" ?>
+<Device>
+	<Version>0.1</Version>
+	<Identification>
+		<Name>L3GD20</Name>		
+		<Description>
+			The L3GD20 is a low-power three-axis angular rate sensor.
+			It includes a sensing element and an IC interface capable of providing the measured angular rate to
+			the external world through a digital interface(I2C/SPI). 
+		</Description>
+		<Manufacturer>ST</Manufacturer>	
+		<Category>Gyroscope</Category>
+	</Identification>
+	<Communication>
+		<Interface>I2C</Interface>
+		<Interface>SPI</Interface>
+		<I2C>
+			<DevAddressCnt>2</DevAddressCnt>
+			<DevAddress no="1">
+				<addr>D4</addr>
+				<active>1</active>
+			</DevAddress>
+			<DevAddress no="2">
+				<addr>D6</addr>
+				<active>0</active>
+			</DevAddress>
+		</I2C>
+		<SPI>
+		</SPI>
+	</Communication>
+	<Data>
+		<DeviceID>
+			<address>0F</address>
+			<ID>D4</ID>
+		</DeviceID>
+		<OutputCnt>3</OutputCnt>
+		<Unit>mg</Unit>
+		<Output no="1" descr="x axis" dataType="byte" len="2" lsb="0" res="13" register="28">X Axis</Output>
+		<Output no="2" descr="y axis" dataType="byte" len="2" lsb="0" res="13" register="2A">Y Axis</Output>
+		<Output no="3" descr="z axis" dataType="byte" len="2" lsb="0" res="13" register="2C">Z Axis</Output>
+	</Data>
+	<DeviceControl>
+		<Control type="powerdown" descr="Power Down the Device">
+			<input name="Power Down" type="checkbox" register="20" bit="3" len="1" cnt="1" def="0" not="1">
+				<val id="0" def="false">Power Down</val>
+			</input>			
+		</Control>
+		<Control type="sleep" descr="Sleep Control">
+			<input name="X Sleep" type="checkbox" register="20" bit="1" len="1" cnt="1" def="0">
+				<val id="0">false</val>
+			</input>
+			<input name="Y Sleep" type="checkbox" register="20" bit="0" len="1" cnt="1" def="0">
+				<val id="0">false</val>
+			</input>
+			<input name="Z Sleep" type="checkbox" register="20" bit="2" len="1" cnt="1" def="0">
+				<val id="0">false</val>
+			</input>
+		</Control>
+		<Control type="odrcutoff" descr="Output Data Rate - Cut-Off">
+			<input name="ODR[Hz] - Cut-Off" type="combo" register="20" bit="4" len="4" cnt="16" def="0">
+				<val id="0">95 - 12.5</val>
+				<val id="1">95 - 25</val>
+				<val id="2">95 - 25</val>
+				<val id="3">95 - 25</val>
+				<val id="4">190 - 12.5</val>
+				<val id="5">190 - 25</val>
+				<val id="6">190 - 50</val>
+				<val id="7">190 - 70</val>
+				<val id="8">380 - 20</val>
+				<val id="9">380 - 25</val>
+				<val id="10">380 - 50</val>
+				<val id="11">380 - 100</val>
+				<val id="12">760 - 30</val>
+				<val id="13">760 - 35</val>
+				<val id="14">760 - 50</val>
+				<val id="15">760 - 100</val>
+			</input>
+		</Control>
+	</DeviceControl>
+</Device>
