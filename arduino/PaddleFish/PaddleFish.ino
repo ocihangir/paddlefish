@@ -13,16 +13,25 @@
 #define STOP_CONDITION 0x03
 #define REPEATED_START_CONDITION 0x04
 
-// Communication related constants
-#define CMD_START 0xA5
+// ** Communication related constants **
+// i2c
 #define CMD_READ_BYTES 0xC0
 #define CMD_WRITE_BYTES 0xC1
 #define CMD_WRITE_BITS 0xC2
+// stream
+#define CMD_STREAM_ON 0xB0
+#define CMD_STREAM_ADD 0xB1
+#define CMD_STREAM_RST 0xB2
+#define CMD_STREAM_PERIOD 0xBF
+// basic
+#define CMD_START 0xA5
+#define CMD_ANSWER 0xA6
 #define CMD_NULL 0x00
 #define CMD_END 0x0C
 #define CMD_ESC 0x0E
+#define CMD_OK 0x0D
 
-#define CMD_ANSWER 0xA6
+
 
 int ledb = 13;
 int blinkCounter = 0;
@@ -111,11 +120,78 @@ void pfControl()
       if (receivedCmd == CMD_NULL)
         // Read command after the communication starts
         receivedCmd = Serial.read();
-      else {        
+      else {
         switch (receivedCmd)
         {
-          case CMD_READ_BYTES: /* |START|Cmd|DevAddr|RegAdd|Length|CRC|End| */
-            
+          case CMD_STREAM_ON: /* |START|Cmd|On|CRC|End| */ 
+            if (Serial.available() > 1)
+            {
+              char buffer[2];
+              if (receiveBytes(2,buffer))
+              {
+                // Start stream if On is CMD_OK
+                
+                Serial.write(CMD_ANSWER);                
+                Serial.write(CMD_OK);
+                Serial.write(CMD_END);
+                startReceive = false;
+                receivedCmd = CMD_NULL;
+              } else 
+                commError();
+            }
+            break;
+          case CMD_STREAM_RST: /* |START|Cmd|CRC|End| */ 
+            if (Serial.available() > 1)
+            {
+              char buffer[2];
+              if (receiveBytes(2,buffer))
+              {
+                // Reset stream buffer
+                
+                Serial.write(CMD_ANSWER);                
+                Serial.write(CMD_OK);
+                Serial.write(CMD_END);
+                startReceive = false;
+                receivedCmd = CMD_NULL;
+              } else 
+                commError();
+            }
+            break;
+          case CMD_STREAM_PERIOD: /* |START|Cmd|Period[2]|CRC|End| */ 
+            if (Serial.available() > 3)
+            {
+              char buffer[4];
+              if (receiveBytes(4,buffer))
+              {
+                // Set timer period
+                
+                Serial.write(CMD_ANSWER);                
+                Serial.write(CMD_OK);
+                Serial.write(CMD_END);
+                startReceive = false;
+                receivedCmd = CMD_NULL;
+              } else 
+                commError();
+            }
+            break;
+          case CMD_STREAM_ADD: /* |START|Cmd|DevAddr|RegAdd|Length|Period[2]|CRC|End| */ 
+            if (Serial.available() > 6)
+            {
+              char buffer[7];
+              if (receiveBytes(7,buffer))
+              {
+                // Add command to stream buffer
+                
+                Serial.write(CMD_ANSWER);                
+                Serial.write(CMD_OK);
+                Serial.write(CMD_END);
+                startReceive = false;
+                receivedCmd = CMD_NULL;
+              } else 
+                commError();
+            }
+            break;
+          case CMD_READ_BYTES: /* |START|Cmd|DevAddr|RegAdd|Length|CRC|End| */            
             if (Serial.available() > 4)
             {
               char buffer[5];
