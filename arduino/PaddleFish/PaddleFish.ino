@@ -23,6 +23,8 @@
 #define CMD_STREAM_ADD 0xB1
 #define CMD_STREAM_RST 0xB2
 #define CMD_STREAM_PERIOD 0xBF
+#define CMD_STREAM_START 0xBE
+#define CMD_STREAM_END 0xBD
 // basic
 #define CMD_START 0xA5
 #define CMD_ANSWER 0xA6
@@ -32,12 +34,22 @@
 #define CMD_OK 0x0D
 
 
+#define MAX_DEV 20 // max number of devices to stream/dump
+#define STREAM_LENGTH 5 // i2cadd[1]+regadd[1]+len[1]+period[2]
+
 
 int ledb = 13;
 int blinkCounter = 0;
 
 boolean startReceive = false;
 byte receivedCmd = 0x00;
+
+byte streamCmdArray[5+MAX_DEV*STREAM_LENGTH];
+int streamPeriod = 100; // ms. This is going to be obsolete by individual periods for commands.
+
+boolean streamON = false;
+
+long time;
 
 void setup()
 {
@@ -50,11 +62,7 @@ void setup()
   }
 #endif
 
-  // set timer to 10 milliseconds. It is constant for now.
-  Timer1.initialize(10000);
-  
-  // attach timer interrupt
-  // Timer1.attachInterrupt(heartBeat);
+
   
   // heartbeat led
   pinMode(ledb, OUTPUT);
@@ -67,6 +75,10 @@ void setup()
   
   TWBR = 0x1F; // TODO : i2c speed slowed down to below 400KHz for eeprom
   
+  streamCmdArray[0] = 0; // number of stream devices is zero
+  
+  time = millis();
+  
 }
 
 
@@ -76,7 +88,7 @@ void loop()
   // caution!
   // don't use interrupts
   // don't use timer1
-  pfControl();
+  pfControl(); // TODO : call pfControl from Timer3 interrupt. Set main loop free.
   delay(500);
 }
 
@@ -130,6 +142,10 @@ void pfControl()
               if (receiveBytes(2,buffer))
               {
                 // Start stream if On is CMD_OK
+                if (buffer[0]==0)
+                  setStream(false);
+                else
+                  setStream(true);
                 
                 Serial.write(CMD_ANSWER);                
                 Serial.write(CMD_OK);
@@ -147,6 +163,7 @@ void pfControl()
               if (receiveBytes(2,buffer))
               {
                 // Reset stream buffer
+                streamReset();
                 
                 Serial.write(CMD_ANSWER);                
                 Serial.write(CMD_OK);
@@ -164,6 +181,8 @@ void pfControl()
               if (receiveBytes(4,buffer))
               {
                 // Set timer period
+                int period = buffer[0]<<8 + buffer[1];
+                setPeriod(period);
                 
                 Serial.write(CMD_ANSWER);                
                 Serial.write(CMD_OK);
@@ -181,6 +200,7 @@ void pfControl()
               if (receiveBytes(7,buffer))
               {
                 // Add command to stream buffer
+                streamAddCmd(buffer);
                 
                 Serial.write(CMD_ANSWER);                
                 Serial.write(CMD_OK);
@@ -260,14 +280,64 @@ void pfControl()
   }
 }
 
+void streamAddCmd(char *buffer)
+{
+  int start = streamCmdArray[0]*STREAM_LENGTH+5;
+  for (int i=0;i<5;i++)
+    streamCmdArray[start+i]=buffer[i];
+  streamCmdArray[0]++;
+}
+
+void streamReset()
+{
+  streamCmdArray[0]=0;
+}
+
+void setPeriod(int period)
+{
+  streamPeriod = period;
+}
+
+void setStream(boolean ON)
+{
+  if (ON)
+  {
+    Timer1.initialize(streamPeriod);   
+    Timer1.attachInterrupt(heartBeat);
+  } else {
+    Timer1.stop();
+    Timer1.detachInterrupt();
+  }
+}
+
 /*
 * HeartBeat is called by timer1 interrupt.
 */
 void heartBeat()
 {
-  char* recBuf = pfReadBytes(0x53,0x32,1);
+  /*char* recBuf = pfReadBytes(0x53,0x32,1);
   Serial.print("read buffer: ");
-  Serial.println(recBuf[0],DEC);
+  Serial.println(recBuf[0],DEC);*/
+  Serial.print(CMD_STREAM_START);
+  
+  // Send 4 bytes timestamp
+  time = millis(); // long
+  Serial.print(time & 0xFF);
+  Serial.print((time>>8) & 0xFF);
+  Serial.print((time>>16) & 0xFF);
+  Serial.print((time>>24) & 0xFF);
+  
+  // Send device data
+  for (int dev=0;dev<streamCmdArray[0];dev++);
+  {
+    int start = 5 + dev * STREAM_LENGTH;
+    char* recBuf = pfReadBytes(start,start+1,start+2);
+    Serial.print(recBuf);
+  }
+  
+  char CRC = 0x00;
+  Serial.print(CRC);
+  Serial.print(CMD_STREAM_END);
   blinkLed();
 }
 
