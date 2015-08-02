@@ -328,7 +328,7 @@ void heartBeat()
   Serial.print((time>>24) & 0xFF);
   
   // Send device data
-  for (int dev=0;dev<streamCmdArray[0];dev++);
+  for (int dev=0;dev<streamCmdArray[0];dev++)
   {
     int start = 5 + dev * STREAM_LENGTH;
     char* recBuf = pfReadBytes(start,start+1,start+2);
