@@ -115,6 +115,23 @@ void loop()
 
   Set measure mode (write bit command)
   A5 C2 53 2D 08 FF 00 0C
+  
+  CMD_STREAM_ADD: 
+  |START|Cmd|DevAddr|RegAdd|Length|Period[2]|CRC|End|
+  A5 B1 53 00 01 00 00 00 0C
+
+  CMD_STREAM_PERIOD: 
+  |START|Cmd|Period[2]|CRC|End|
+  A5 BF 04 E8 00 0C
+
+  CMD_STREAM_ON: 
+  |START|Cmd|On|CRC|End|
+  A5 B0 01 00 0C
+
+  CMD_STREAM_RST: 
+  |START|Cmd|CRC|End|
+  A5 B2 00 0C
+  
 */
 void pfControl()
 {
