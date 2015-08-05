@@ -310,20 +310,13 @@ void streamReset()
 void setPeriod(unsigned int period)
 {
   streamPeriod = period;
-  Serial.print("Stream");
-  Serial.print(streamPeriod);
-  Serial.println("ok");
 }
 
 void setStream(boolean ON)
 {
   if (ON)
   {
-    
     unsigned long streamPeriodInMicroSeconds = streamPeriod*1000;
-    Serial.print("StreamON");
-    Serial.print(streamPeriodInMicroSeconds);
-    Serial.println("ok");
     Timer1.initialize(streamPeriodInMicroSeconds);
     Timer1.setPeriod(streamPeriodInMicroSeconds);
     Timer1.attachInterrupt(heartBeat);
