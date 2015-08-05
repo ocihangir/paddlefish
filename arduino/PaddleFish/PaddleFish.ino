@@ -45,7 +45,7 @@ boolean startReceive = false;
 byte receivedCmd = 0x00;
 
 byte streamCmdArray[5+MAX_DEV*STREAM_LENGTH];
-unsigned int streamPeriod = 1000; // ms. This is going to be obsolete by individual periods for commands.
+unsigned long streamPeriod = 1000; // ms. This is going to be obsolete by individual periods for commands.
 
 boolean streamON = false;
 
@@ -319,7 +319,13 @@ void setStream(boolean ON)
 {
   if (ON)
   {
-    Timer1.initialize(streamPeriod*1000);
+    
+    unsigned long streamPeriodInMicroSeconds = streamPeriod*1000;
+    Serial.print("StreamON");
+    Serial.print(streamPeriodInMicroSeconds);
+    Serial.println("ok");
+    Timer1.initialize(streamPeriodInMicroSeconds);
+    Timer1.setPeriod(streamPeriodInMicroSeconds);
     Timer1.attachInterrupt(heartBeat);
   } else {
     Timer1.stop();
