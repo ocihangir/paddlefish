@@ -68,7 +68,7 @@ void setup()
   
   Timer1.initialize(1000000);
   Timer1.attachInterrupt(heartBeat);
-  //Timer1.stop();
+  Timer1.stop();
   
   TWBR = 0x1F; // TODO : i2c speed slowed down to below 400KHz for eeprom
   
