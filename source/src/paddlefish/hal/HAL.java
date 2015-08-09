@@ -9,23 +9,23 @@ public class HAL {
 	public HAL() throws Exception
 	{
 		// Linux - Ubuntu
-		usbComm = new USB("/dev/ttyACM2",115200);
+		usbComm = new USB("/dev/ttyACM0",115200);
 		// Windows
 		//usbComm = new USB("COM4",115200);
 	}
 	
-	public void txData(char data[]) throws IOException
+	public void txData(byte data[]) throws IOException
 	{
 		usbComm.sendData(data);
 	}
 	
-	public char[] rxData() throws IOException
+	public byte[] rxData() throws IOException
 	{
 		
 		byte[] data = usbComm.receiveData();
-		char[] buffer = new char[data.length];
+		byte[] buffer = new byte[data.length];
 		for (int i=0;i<data.length;i++)
-			buffer[i] = (char) data[i];
+			buffer[i] = (byte) data[i];
 		return buffer;
 	}
 

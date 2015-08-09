@@ -69,7 +69,7 @@ public class USB
 			System.out.println("No CommPort available");
 	}
 	
-	public void sendData(char[] data) throws IOException
+	public void sendData(byte[] data) throws IOException
 	{
 		byte buffer[] = new byte[data.length];
 		for (int i=0;i<data.length;i++)

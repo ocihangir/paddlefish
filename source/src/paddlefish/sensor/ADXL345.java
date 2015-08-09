@@ -41,7 +41,7 @@ public class ADXL345 extends GenSensor{
 				}
 			}
 			CommController com = CommController.getInstance();
-			com.writeBits((char)(this.getI2cInf().getActiveDeviceAddr()&0xff),(char)register, (char)value, (char)mask);
+			com.writeBits((byte)(this.getI2cInf().getActiveDeviceAddr()&0xff),register, value, mask);
 			this.isOpen=false;
 		}
 		return false;
@@ -67,7 +67,7 @@ public class ADXL345 extends GenSensor{
 				}
 			}
 			CommController com = CommController.getInstance();
-			com.writeBits((char)(this.getI2cInf().getActiveDeviceAddr()&0xff),(char)register, (char)value, (char)mask);		
+			com.writeBits((byte)(this.getI2cInf().getActiveDeviceAddr()&0xff), register, value, mask);		
 			this.isOpen=true;
 		}
 		return false;
