@@ -20,13 +20,8 @@ public class HAL {
 	}
 	
 	public byte[] rxData() throws IOException
-	{
-		
-		byte[] data = usbComm.receiveData();
-		byte[] buffer = new byte[data.length];
-		for (int i=0;i<data.length;i++)
-			buffer[i] = (byte) data[i];
-		return buffer;
+	{		
+		return usbComm.receiveData();
 	}
 
 	public void close()

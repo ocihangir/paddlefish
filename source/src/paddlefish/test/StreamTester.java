@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import paddlefish.protocol.CommStreamer;
+
 public class StreamTester {
 
 	@Test
@@ -18,7 +20,7 @@ public class StreamTester {
 		byte devAddress = (byte)0x53; // ADXL345
 		byte regAddress = (byte)0x00;
 		byte length = 1;
-		byte[] period = new byte[]{0, 0};
+		int period = 0;
 		assertTrue("addDevice must return true", streamer.addDevice(devAddress, regAddress, length, period));
 	}
 	

@@ -161,9 +161,7 @@ void pfControl()
                 else
                   setStream(true);
                 
-                Serial.write(CMD_ANSWER);                
-                Serial.write(CMD_OK);
-                Serial.write(CMD_END);
+                commOK();
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -179,9 +177,7 @@ void pfControl()
                 // Reset stream buffer
                 streamReset();
                 
-                Serial.write(CMD_ANSWER);                
-                Serial.write(CMD_OK);
-                Serial.write(CMD_END);
+                commOK();
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -198,9 +194,7 @@ void pfControl()
                 unsigned int period = ((buffer[0]<<8) + buffer[1]) & 0xFFFF;
                 setPeriod(period);
                 
-                Serial.write(CMD_ANSWER);                
-                Serial.write(CMD_OK);
-                Serial.write(CMD_END);
+                commOK();
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -216,9 +210,7 @@ void pfControl()
                 // Add command to stream buffer
                 streamAddCmd(buffer);
                 
-                Serial.write(CMD_ANSWER);                
-                Serial.write(CMD_OK);
-                Serial.write(CMD_END);
+                commOK();
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -260,8 +252,10 @@ void pfControl()
                     pfWriteBytes(buffer[0], buffer[1], buffer[2], dataBuffer);
                   else 
                     commError();
+                    
+                  commOK();
                   receivedCmd = CMD_NULL;
-                startReceive = false;
+                  startReceive = false;
                 } else 
                 commError();
             }
@@ -275,9 +269,7 @@ void pfControl()
                 char sendData[1];
                 char* recBuf = pfReadBytes(buffer[0],buffer[1],1);
                 sendData[0] = (buffer[3] & buffer[2]) | (~buffer[3] & recBuf[0]);
-                Serial.write(CMD_ANSWER);
-                Serial.write(sendData[0]);
-                Serial.write(CMD_END);
+                commOK();
                 pfWriteBytes(buffer[0], buffer[1], 1, sendData);
                 receivedCmd = CMD_NULL;
                 startReceive = false;
@@ -516,6 +508,13 @@ void commError()
   // Error in UART communication
   receivedCmd = CMD_NULL;
   startReceive = false;
+}
+
+void commOK()
+{
+  Serial.write(CMD_ANSWER);                
+  Serial.write(CMD_OK);
+  Serial.write(CMD_END);
 }
 
 void disableInterrupt()

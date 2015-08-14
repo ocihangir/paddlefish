@@ -102,6 +102,97 @@ public class CommController
 		
 		//return receivedData;
 	}
+	
+	
+	public boolean addDevice(byte deviceAddress, byte registerAddress, byte length, int period) throws IOException, InterruptedException
+	{
+		byte cmd[] = new byte[9];
+		
+		cmd[0] = CommConstants.CMD_START;
+		cmd[1] = CommConstants.CMD_STREAM_ADD;
+		cmd[2] = deviceAddress;
+		cmd[3] = registerAddress;
+		cmd[4] = (byte) length;
+		cmd[5] = (byte)( period & 0xFF );
+		cmd[6] = (byte)( ( period >> 8 ) & 0xFF );
+		cmd[7] = 0x00;
+		cmd[8] = CommConstants.CMD_END;
+		
+		hal.txData(cmd);
+		
+		Thread.sleep(50);
+		byte[] receivedData = hal.rxData();
+		return true;
+	}
+	
+	public boolean setPeriod(int period) throws IOException, InterruptedException
+	{
+		byte cmd[] = new byte[6];
+		
+		cmd[0] = CommConstants.CMD_START;
+		cmd[1] = CommConstants.CMD_STREAM_ADD;
+		cmd[2] = (byte)( period & 0xFF );
+		cmd[3] = (byte)( ( period >> 8 ) & 0xFF );
+		cmd[4] = 0x00;
+		cmd[5] = CommConstants.CMD_END;
+		
+		hal.txData(cmd);
+		
+		Thread.sleep(50);
+		byte[] receivedData = hal.rxData();
+		return true;
+	}
+	
+	public boolean start() throws IOException, InterruptedException
+	{
+		byte cmd[] = new byte[5];
+		
+		cmd[0] = CommConstants.CMD_START;
+		cmd[1] = CommConstants.CMD_STREAM_ADD;
+		cmd[2] = 0x01;
+		cmd[3] = 0x00;
+		cmd[4] = CommConstants.CMD_END;
+		
+		hal.txData(cmd);
+		
+		Thread.sleep(50);
+		byte[] receivedData = hal.rxData();
+		return true;
+	}
+	
+	public boolean stop() throws IOException, InterruptedException
+	{
+		byte cmd[] = new byte[5];
+		
+		cmd[0] = CommConstants.CMD_START;
+		cmd[1] = CommConstants.CMD_STREAM_ADD;
+		cmd[2] = 0x00;
+		cmd[3] = 0x00;
+		cmd[4] = CommConstants.CMD_END;
+		
+		hal.txData(cmd);
+		
+		Thread.sleep(50);
+		byte[] receivedData = hal.rxData();
+		return true;
+	}
+	
+	public boolean reset() throws IOException, InterruptedException
+	{
+		byte cmd[] = new byte[4];
+		
+		cmd[0] = CommConstants.CMD_START;
+		cmd[1] = CommConstants.CMD_STREAM_ADD;
+		cmd[2] = 0x00;
+		cmd[3] = CommConstants.CMD_END;
+		
+		hal.txData(cmd);
+		
+		Thread.sleep(50);
+		byte[] receivedData = hal.rxData();
+		return true;
+	}
+	
 
 	public void close()
 	{
