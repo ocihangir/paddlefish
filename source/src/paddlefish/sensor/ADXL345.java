@@ -7,10 +7,12 @@ import paddlefish.protocol.CommController;
 
 public class ADXL345 extends GenSensor{
 	private static final int AXIS = 3;
+	CommController com;
 	
 	public ADXL345(SensorCategory c, String devname) throws Exception {
 		super(c, devname);
 		// TODO Auto-generated constructor stub
+		com = CommController.getInstance();
 		this.startMeasuring();
 	}
 	
@@ -40,7 +42,7 @@ public class ADXL345 extends GenSensor{
 					mask = (byte) (mask<<bit);
 				}
 			}
-			CommController com = CommController.getInstance();
+
 			com.writeBits((byte)(this.getI2cInf().getActiveDeviceAddr()&0xff),register, value, mask);
 			this.isOpen=false;
 		}
@@ -66,7 +68,7 @@ public class ADXL345 extends GenSensor{
 					mask = (byte) (mask<<bit);
 				}
 			}
-			CommController com = CommController.getInstance();
+			
 			com.writeBits((byte)(this.getI2cInf().getActiveDeviceAddr()&0xff), register, value, mask);		
 			this.isOpen=true;
 		}
