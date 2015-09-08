@@ -2,7 +2,6 @@ package paddlefish.protocol;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import paddlefish.hal.CommStreamerInterface;
 import paddlefish.hal.HAL;
 
@@ -10,7 +9,7 @@ public class CommStreamer implements CommStreamerInterface {
 
 	private static HAL hal;
 	private List<CommStreamerInterface> streamReceiverList = new ArrayList<CommStreamerInterface>();
-	
+		
 	public CommStreamer() throws Exception 
 	{
 		 if(hal==null)
@@ -25,6 +24,11 @@ public class CommStreamer implements CommStreamerInterface {
 	
 	public void addDevice(byte deviceAddress, byte registerAddress, int length, int period) throws Exception
 	{
+		addDevice(deviceAddress, registerAddress, length, period, 0);
+	}
+	
+	public void addDevice(byte deviceAddress, byte registerAddress, int length, int period, int sender) throws Exception
+	{
 		byte cmd[] = new byte[9];
 		
 		cmd[0] = CommConstants.CMD_START;
@@ -38,14 +42,14 @@ public class CommStreamer implements CommStreamerInterface {
 		cmd[8] = CommConstants.CMD_END;
 		
 		hal.txData(cmd);
-		
-		Thread.sleep(50);
-		//byte[] receivedData = hal.rxData();
-		
-		//return checkOK(receivedData);
 	}
 	
 	public void setPeriod(int period) throws Exception
+	{
+		setPeriod(period, 0);
+	}
+	
+	public void setPeriod(int period, int sender) throws Exception
 	{
 		byte cmd[] = new byte[6];
 		
@@ -57,14 +61,14 @@ public class CommStreamer implements CommStreamerInterface {
 		cmd[5] = CommConstants.CMD_END;
 		
 		hal.txData(cmd);
-		
-		Thread.sleep(50);
-		//byte[] receivedData = hal.rxData();
-		
-		//return checkOK(receivedData);
 	}
 	
 	public void start() throws Exception
+	{
+		start(0);
+	}
+	
+	public void start(int sender) throws Exception
 	{
 		byte cmd[] = new byte[5];
 		
@@ -75,14 +79,14 @@ public class CommStreamer implements CommStreamerInterface {
 		cmd[4] = CommConstants.CMD_END;
 		
 		hal.txData(cmd);
-		
-		Thread.sleep(50);
-		//byte[] receivedData = hal.rxData();
-		
-		//return checkOK(receivedData);
 	}
 	
 	public void stop() throws Exception
+	{
+		stop(0);
+	}
+	
+	public void stop(int sender) throws Exception
 	{
 		byte cmd[] = new byte[5];
 		
@@ -93,14 +97,14 @@ public class CommStreamer implements CommStreamerInterface {
 		cmd[4] = CommConstants.CMD_END;
 		
 		hal.txData(cmd);
-		
-		Thread.sleep(50);
-		//byte[] receivedData = hal.rxData();
-		
-		//return checkOK(receivedData);
 	}
 	
 	public void reset() throws Exception
+	{
+		reset(0);
+	}
+	
+	public void reset(int sender) throws Exception
 	{
 		byte cmd[] = new byte[4];
 		
@@ -110,16 +114,10 @@ public class CommStreamer implements CommStreamerInterface {
 		cmd[3] = CommConstants.CMD_END;
 		
 		hal.txData(cmd);
-		
-		Thread.sleep(50);
-		//byte[] receivedData = hal.rxData();
-		
-		//return checkOK(receivedData);
 	}
 
 	@Override
 	public void streamReceiver(byte[] buffer) {
-		// TODO Auto-generated method stub
 		for (CommStreamerInterface commStreamer : streamReceiverList)
 			commStreamer.streamReceiver(buffer);
 	}

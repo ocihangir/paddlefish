@@ -2,9 +2,12 @@ package paddlefish.protocol;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import jssc.SerialPortException;
 import paddlefish.hal.CommControllerInterface;
+import paddlefish.hal.CommReceiverInterface;
 import paddlefish.hal.HAL;
 import paddlefish.protocol.CommConstants;
 
@@ -16,8 +19,10 @@ public class CommController implements CommControllerInterface
 	private static CommController instance = null;
 	private static HAL hal;
 	
-	private List<CommControllerInterface> dataReceiverList = new ArrayList<CommControllerInterface>();
-	private List<CommControllerInterface> commandReceiverList = new ArrayList<CommControllerInterface>();
+	private List<CommReceiverInterface> dataReceiverList = new ArrayList<CommReceiverInterface>();
+	private List<CommReceiverInterface> commandReceiverList = new ArrayList<CommReceiverInterface>();
+	
+	Queue<Object> sendQueue = new LinkedBlockingQueue<>();
 	
 	protected CommController() throws Exception 
 	{
@@ -38,12 +43,12 @@ public class CommController implements CommControllerInterface
 	      return instance;
 	}
     
-    public void addDataReceiver(CommControllerInterface commRx)
+    public void addDataReceiver(CommReceiverInterface commRx)
     {
     	dataReceiverList.add(commRx);
     }
     
-    public void addCommandReceiver(CommControllerInterface commRx)
+    public void addCommandReceiver(CommReceiverInterface commRx)
     {
     	commandReceiverList.add(commRx);
     }
@@ -69,7 +74,12 @@ public class CommController implements CommControllerInterface
     	hal.disconnect();
     }
     
-	public void readByteArray(byte deviceAddress, byte registerAddress, int length) throws Exception
+    public void readByteArray(byte deviceAddress, byte registerAddress, int length) throws Exception
+    {
+    	readByteArray(deviceAddress, registerAddress, length, 0);
+    }
+    
+	public void readByteArray(byte deviceAddress, byte registerAddress, int length, int sender) throws Exception
 	{
 		byte cmd[] = new byte[7];
 		
@@ -83,13 +93,15 @@ public class CommController implements CommControllerInterface
 		
 		hal.txData(cmd);
 		
-		Thread.sleep(50);
-		//byte[] receivedData = hal.rxData();
-		
-		//return receivedData;
+		sendQueue.add(sender);
 	}
 	
 	public void writeSingleByte(byte deviceAddress, byte registerAddress, byte data) throws Exception
+	{
+		writeSingleByte(deviceAddress, registerAddress, data, 0);
+	}
+	
+	public void writeSingleByte(byte deviceAddress, byte registerAddress, byte data, int sender) throws Exception
 	{
 		byte cmd[] = new byte[8];
 		
@@ -104,12 +116,15 @@ public class CommController implements CommControllerInterface
 		
 		hal.txData(cmd);
 		
-		//byte[] receivedData = hal.rxData();
-		
-		//return checkOK(receivedData);
+		sendQueue.add(sender);
 	}
 	
 	public void writeByteArray(byte deviceAddress, byte registerAddress, int length, byte data[]) throws Exception
+	{
+		writeByteArray(deviceAddress, registerAddress, length, data, 0);
+	}
+	
+	public void writeByteArray(byte deviceAddress, byte registerAddress, int length, byte data[], int sender) throws Exception
 	{
 		byte cmd[] = new byte[8+length];
 		
@@ -125,12 +140,15 @@ public class CommController implements CommControllerInterface
 		
 		hal.txData(cmd);
 		
-		//byte[] receivedData = hal.rxData();
-		
-		//return checkOK(receivedData);
+		sendQueue.add(sender);
 	}
 	
 	public void writeBits(byte deviceAddress, byte registerAddress, byte data, byte mask) throws Exception
+	{
+		writeBits(deviceAddress, registerAddress, data, mask, 0);
+	}
+	
+	public void writeBits(byte deviceAddress, byte registerAddress, byte data, byte mask, int sender) throws Exception
 	{
 		byte cmd[] = new byte[8];
 		
@@ -145,16 +163,15 @@ public class CommController implements CommControllerInterface
 		
 		hal.txData(cmd);
 		
-		Thread.sleep(50);
-		//byte[] receivedData = hal.rxData();
-		
-		//return checkOK(receivedData);
+		sendQueue.add(sender);
 	}
 	
-	
-	
-	
 	public void setI2CSpeed(long speed) throws Exception
+	{
+		setI2CSpeed(speed, 0);
+	}
+	
+	public void setI2CSpeed(long speed, int sender) throws Exception
 	{
 		byte cmd[] = new byte[8];
 		
@@ -169,14 +186,15 @@ public class CommController implements CommControllerInterface
 		
 		hal.txData(cmd);
 		
-		Thread.sleep(50);
-		//byte[] receivedData = hal.rxData();
-		
-		//return receivedData;
+		sendQueue.add(sender);
 	}
 	
-	
 	public void testData(byte length) throws Exception
+	{
+		testData(length, 0);
+	}
+	
+	public void testData(byte length, int sender) throws Exception
 	{
 		byte cmd[] = new byte[5];
 		
@@ -188,13 +206,9 @@ public class CommController implements CommControllerInterface
 		
 		hal.txData(cmd);
 		
-		Thread.sleep(50);
-		//byte[] receivedData = hal.rxData();
-		
-		//return receivedData;
+		sendQueue.add(sender);
 	}
 	
-
 	public void close()
 	{
 		if(hal!=null)
@@ -208,16 +222,14 @@ public class CommController implements CommControllerInterface
 	
 	@Override
 	public void commCommandReceiver(byte[] receivedMessage) {
-		// TODO Auto-generated method stub
-		for (CommControllerInterface commRx : commandReceiverList)
-        	commRx.commCommandReceiver(receivedMessage);
+		for (CommReceiverInterface commRx : commandReceiverList)
+        	commRx.commCommandReceiver(receivedMessage, sendQueue.poll());
 	}
 
 
 	@Override
 	public void commDataReceiver(byte[] receivedMessage) {
-		// TODO Auto-generated method stub
-		for (CommControllerInterface commRx : dataReceiverList)
-        	commRx.commDataReceiver(receivedMessage);
+		for (CommReceiverInterface commRx : dataReceiverList)
+        	commRx.commDataReceiver(receivedMessage, sendQueue.poll());
 	}
 }
