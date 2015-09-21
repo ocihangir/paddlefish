@@ -5,11 +5,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import jssc.SerialPortException;
 import paddlefish.hal.CommControllerInterface;
 import paddlefish.hal.CommReceiverInterface;
 import paddlefish.hal.HAL;
-import paddlefish.protocol.CommConstants;
 
 
 
@@ -64,12 +62,12 @@ public class CommController implements CommControllerInterface
     	return ports;
     }
     
-    public void connect(String port, int baud) throws SerialPortException
+    public void connect(String port, int baud) throws Exception
     {
     	hal.connect(port, baud);    	
     }
 	   
-    public void disconnect() throws SerialPortException
+    public void disconnect() throws Exception
     {
     	hal.disconnect();
     }

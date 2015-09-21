@@ -1,4 +1,4 @@
-package net.aldemir.paddlefish;
+package src.paddlefish;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
