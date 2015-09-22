@@ -1,6 +1,7 @@
 package paddlefish.io;
 
 import java.io.IOException;
+
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -26,6 +27,8 @@ import paddlefish.def.SensorIdent;
 import paddlefish.def.SensorMeasurement;
 import paddlefish.def.SensorOutput;
 
+import java.io.File;
+
 public class SensorXMLReader 
 {
 	public static final String modelPath = "..\\..\\models\\sensors";
@@ -45,6 +48,15 @@ public class SensorXMLReader
 	public SensorXMLReader(SensorCategory c, String devname) 
 	{
 		String filename = "/models/sensors/"+c.getFolderName()+"/"+devname+".xml";
+		
+        File f = new File(filename);
+
+        //get all the files from a directory
+
+        if(f.exists()) 
+        {        	
+        	System.out.println(filename); 
+        }        
 		
 		System.out.println(filename);
 		this.fName=filename;
@@ -408,6 +420,7 @@ public class SensorXMLReader
 	    //Load and Parse the XML document
 	    //document contains the complete XML as a Tree.
 	    InputStream xmlFile = getClass().getResourceAsStream(this.fName);
+	    //File xmlFile = new File(this.fName);
 	    
 	    Document curDocument = 
 	      builder.parse(xmlFile);

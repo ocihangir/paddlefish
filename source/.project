@@ -16,17 +16,7 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>src/models</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>src/paddlefish</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>src/models/sensors</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -62,36 +52,6 @@
 		</link>
 		<link>
 			<name>src/paddlefish/test</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>bin/models/sensors/ExampleSensor.dtd</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/android/PaddleFish/app/src/main/java/models/sensors/ExampleSensor.dtd</locationURI>
-		</link>
-		<link>
-			<name>bin/models/sensors/ExampleSensor.xml</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/android/PaddleFish/app/src/main/java/models/sensors/ExampleSensor.xml</locationURI>
-		</link>
-		<link>
-			<name>src/models/sensors/ExampleSensor.dtd</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/android/PaddleFish/app/src/main/java/models/sensors/ExampleSensor.dtd</locationURI>
-		</link>
-		<link>
-			<name>src/models/sensors/ExampleSensor.xml</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/android/PaddleFish/app/src/main/java/models/sensors/ExampleSensor.xml</locationURI>
-		</link>
-		<link>
-			<name>src/models/sensors/accelerometer</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>src/models/sensors/gyroscope</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -219,26 +179,6 @@
 			<name>src/paddlefish/test/Tester.java</name>
 			<type>1</type>
 			<locationURI>PROJECT_LOC/src/test/Tester.java</locationURI>
-		</link>
-		<link>
-			<name>bin/models/sensors/accelerometer/ADXL345.xml</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/android/PaddleFish/app/src/main/java/models/sensors/accelerometer/ADXL345.xml</locationURI>
-		</link>
-		<link>
-			<name>bin/models/sensors/gyroscope/L3GD20.xml</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/android/PaddleFish/app/src/main/java/models/sensors/gyroscope/L3GD20.xml</locationURI>
-		</link>
-		<link>
-			<name>src/models/sensors/accelerometer/ADXL345.xml</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/android/PaddleFish/app/src/main/java/models/sensors/accelerometer/ADXL345.xml</locationURI>
-		</link>
-		<link>
-			<name>src/models/sensors/gyroscope/L3GD20.xml</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/android/PaddleFish/app/src/main/java/models/sensors/gyroscope/L3GD20.xml</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
