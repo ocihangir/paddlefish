@@ -222,14 +222,16 @@ public class CommController implements CommControllerInterface
 	
 	@Override
 	public void commCommandReceiver(byte[] receivedMessage) {
+		int sender = (int) sendQueue.poll();
 		for (CommReceiverInterface commRx : commandReceiverList)
-        	commRx.commCommandReceiver(receivedMessage, sendQueue.poll());
+        	commRx.commCommandReceiver(receivedMessage, sender);
 	}
 
 
 	@Override
 	public void commDataReceiver(byte[] receivedMessage) {
+		int sender = (int) sendQueue.poll();
 		for (CommReceiverInterface commRx : dataReceiverList)
-        	commRx.commDataReceiver(receivedMessage, sendQueue.poll());
+        	commRx.commDataReceiver(receivedMessage, sender);
 	}
 }

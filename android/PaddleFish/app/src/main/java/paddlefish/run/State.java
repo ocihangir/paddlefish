@@ -76,6 +76,19 @@ public class State
 		{
 			System.out.println("Ooops :( ");
 		}
+		
+		try {Thread.sleep(2000);} catch (InterruptedException ie) {} // Wait for communication channel is up
+		
+		GenSensor testSens2 = stTester.addDevice("ADXL345");
+		if(testSens2!=null)
+		{
+			System.out.println("Success! "+testSens2.getCommId()+ " "+ testSens2.getIdentInfo().descr);
+		}
+		else
+		{
+			System.out.println("Ooops :( ");
+		}
+		
 		System.exit(0);
 	}
 }

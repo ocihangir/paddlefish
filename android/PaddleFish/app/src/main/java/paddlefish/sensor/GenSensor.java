@@ -152,6 +152,7 @@ public abstract class GenSensor implements CommReceiverInterface {
 	
 	public void commCommandReceiver(byte[] buffer, Object receiver) 
 	{
+		System.out.println(" receiver: "+receiver+" my com id "+ this.commId);
 		if((int)receiver==this.commId)
 		{
 			System.out.println("Command Received in GenSensor");
@@ -188,6 +189,7 @@ public abstract class GenSensor implements CommReceiverInterface {
 	
 	public void commDataReceiver(byte[] buffer, Object receiver) 
 	{
+		System.out.println(" receiver: "+receiver+" my com id "+ this.commId);
 		if((int)receiver==this.commId)
 		{
 			System.out.println("Command Received in GenSensor");
