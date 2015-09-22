@@ -16,7 +16,13 @@ public class CommunicationTester
 	static CommController commCont;
 	public static byte[] testReadBytes(byte deviceAddress, byte registerAddress, int length) throws IOException, InterruptedException
 	{
-		byte[] data = commCont.readByteArray(deviceAddress, registerAddress, length);
+		byte[] data = null;
+		try {
+			commCont.readByteArray(deviceAddress, registerAddress, length);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		@SuppressWarnings("null")
 		byte[] buffer = new byte[data.length];
 		for (int i=0;i<data.length;i++)
 			buffer[i] = (byte) data[i];
@@ -30,15 +36,23 @@ public class CommunicationTester
 		return buffer;
 	}
 	
-	public static void testWriteSingleByte(byte deviceAddress, byte registerAddress, byte data) throws IOException, InterruptedException
+	public static void testWriteSingleByte(byte deviceAddress, byte registerAddress, byte data)
 	{
-		commCont.writeSingleByte(deviceAddress, registerAddress, data);
+		try {
+			commCont.writeSingleByte(deviceAddress, registerAddress, data);
+		} catch ( Exception e) {
+			e.printStackTrace();
+		}
 		System.out.println("Data written");		
 	}
 	
-	public static void testWriteMultiBytes(byte deviceAddress, byte registerAddress, byte[] data) throws IOException, InterruptedException
+	public static void testWriteMultiBytes(byte deviceAddress, byte registerAddress, byte[] data)
 	{
-		commCont.writeByteArray(deviceAddress, registerAddress, data.length, data);
+		try {
+			commCont.writeByteArray(deviceAddress, registerAddress, data.length, data);
+		} catch ( Exception e) {
+			e.printStackTrace();
+		}
 		System.out.println("Data written");		
 	}
 	
@@ -61,22 +75,22 @@ public class CommunicationTester
 			System.out.print("Answer start byte is wrong!");
 			return false;
 		}
-		if (res[1] != 0x55)
+		if ((byte)res[1] != (byte)0x55)
 		{
 			System.out.print("Written and read data don't match!");
 			return false;
 		}
-		if (res[2] != 0x55)
+		if ((byte)res[2] != (byte)0x55)
 		{
 			System.out.print("Written and read data don't match!");
 			return false;
 		}
-		if (res[3] != 0x55)
+		if ((byte)res[3] != (byte)0x55)
 		{
 			System.out.print("Written and read data don't match!");
 			return false;
 		}
-		if ((res[4] & 0xFF) != CommConstants.CMD_END)
+		if ((byte)(res[4] & 0xFF) != CommConstants.CMD_END)
 		{
 			System.out.print("Answer end byte wrong!");
 			return false;
@@ -94,17 +108,17 @@ public class CommunicationTester
 			System.out.print("Answer start byte is wrong!");
 			return false;
 		}
-		if (res[1] != 0x00)
+		if ((byte)res[1] != (byte)0x00)
 		{
 			System.out.print("Written and read data don't match!");
 			return false;
 		}
-		if (res[2] != 0x00)
+		if ((byte)res[2] != (byte)0x00)
 		{
 			System.out.print("Written and read data don't match!");
 			return false;
 		}
-		if (res[3] != 0x00)
+		if ((byte)res[3] != (byte)0x00)
 		{
 			System.out.print("Written and read data don't match!");
 			return false;
@@ -137,12 +151,12 @@ public class CommunicationTester
 			System.out.print("Answer start byte is wrong!");
 			return false;
 		}
-		if (res[1] != 0x08)
+		if ((byte)res[1] != (byte)0x08)
 		{
 			System.out.print("Written and read data don't match!");
 			return false;
 		}
-		if ((res[2] & 0xFF) != CommConstants.CMD_END)
+		if ((byte)(res[2] & 0xFF) != CommConstants.CMD_END)
 		{
 			System.out.print("Answer end byte wrong!");
 			return false;
@@ -158,7 +172,7 @@ public class CommunicationTester
 			System.out.print("Answer start byte is wrong!");
 			return false;
 		}
-		if (res[1] != 0x00)
+		if ((byte)res[1] != (byte)0x00)
 		{
 			System.out.print("Written and read data don't match!");
 			return false;
@@ -180,7 +194,7 @@ public class CommunicationTester
 		
 		System.out.println("Reading ADXL345 ID...");
 		
-		ADXL345 adSens = new ADXL345(SensorCategory.ACC, "ADXL345");
+		ADXL345 adSens = new ADXL345();
 		
 		byte hexAdd = (byte) (adSens.getI2cInf().getActiveDeviceAddr()&0xff);
 		byte devIdAdd =  (byte) (adSens.getIdentInfo().deviceIDAddress&0xff);
@@ -214,7 +228,7 @@ public class CommunicationTester
 	{
 		System.out.println("-Testing Power ADXL345-");
 		
-		ADXL345 adSens = new ADXL345(SensorCategory.ACC, "ADXL345");
+		ADXL345 adSens = new ADXL345();
 		
 		byte hexAdd = (byte) (adSens.getI2cInf().getActiveDeviceAddr()&0xff);
 		
@@ -258,17 +272,17 @@ public class CommunicationTester
 			System.out.print("Answer start byte is wrong!");
 			return false;
 		}
-		if (res[1] != 0x55)
+		if ((byte)res[1] != 0x55)
 		{
 			System.out.print("Written and read data don't match!");
 			return false;
 		}
-		if (res[2] != 0x55)
+		if ((byte)res[2] != 0x55)
 		{
 			System.out.print("Written and read data don't match!");
 			return false;
 		}
-		if (res[3] != 0x55)
+		if ((byte)res[3] != 0x55)
 		{
 			System.out.print("Written and read data don't match!");
 			return false;
@@ -295,17 +309,17 @@ public class CommunicationTester
 			System.out.print("Answer start byte is wrong!");
 			return false;
 		}
-		if (res[1] != 0x00)
+		if ((byte)res[1] != 0x00)
 		{
 			System.out.print("Written and read data don't match!");
 			return false;
 		}
-		if (res[2] != 0x00)
+		if ((byte)res[2] != 0x00)
 		{
 			System.out.print("Written and read data don't match!");
 			return false;
 		}
-		if (res[3] != 0x00)
+		if ((byte)res[3] != 0x00)
 		{
 			System.out.print("Written and read data don't match!");
 			return false;
@@ -324,7 +338,6 @@ public class CommunicationTester
 	
 	public static void main(String[] args) throws Exception
 	{
-		/* */
 		commCont = CommController.getInstance();
 		try {Thread.sleep(2000);} catch (InterruptedException ie) {} // Wait for communication channel is up
 		

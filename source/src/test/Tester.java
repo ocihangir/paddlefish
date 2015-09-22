@@ -79,7 +79,7 @@ public class Tester {
 	{
 		// TODO Auto-generated method stub
 		// Assume we have added ADXL345
-		ADXL345 adSens = new ADXL345(SensorCategory.ACC, "ADXL345");
+		ADXL345 adSens = new ADXL345();
 		
 		Tester test = new Tester();
 		test.testIdentificationInfo(adSens.getIdentInfo());

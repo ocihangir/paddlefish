@@ -1,23 +1,20 @@
 /* Paddlefish */
 
 #include "TimerOne.h"
+#include "LWI2C.h"
 
 //#define LEONARDO 1
 
 #define BAUDRATE 115200
+#define MAX_DEV 20 // max number of devices to stream/dump
 
-// I2C related constants
-#define START_CONDITION 0x00
-#define SEND_CONDITION 0x01
-#define SEND_CONDITION_NACK 0x02
-#define STOP_CONDITION 0x03
-#define REPEATED_START_CONDITION 0x04
 
 // ** Communication related constants **
 // i2c
 #define CMD_READ_BYTES 0xC0
 #define CMD_WRITE_BYTES 0xC1
 #define CMD_WRITE_BITS 0xC2
+#define CMD_SET_I2C_SPEED 0XC3
 // stream
 #define CMD_STREAM_ON 0xB0
 #define CMD_STREAM_ADD 0xB1
@@ -28,15 +25,16 @@
 // basic
 #define CMD_START 0xA5
 #define CMD_ANSWER 0xA6
+#define CMD_DATA_ANSWER 0xA7
+#define CMD_DATA_TEST 0xAF
 #define CMD_NULL 0x00
 #define CMD_END 0x0C
 #define CMD_ESC 0x0E
 #define CMD_OK 0x0D
 
-
-#define MAX_DEV 20 // max number of devices to stream/dump
 #define STREAM_LENGTH 5 // i2cadd[1]+regadd[1]+len[1]+period[2]
 
+LWI2C lwi2c;
 
 int ledb = 13;
 int blinkCounter = 0;
@@ -70,7 +68,7 @@ void setup()
   Timer1.attachInterrupt(heartBeat);
   Timer1.stop();
   
-  TWBR = 0x1F; // TODO : i2c speed slowed down to below 400KHz for eeprom
+  lwi2c.i2c_set_speed(300000); // TODO : i2c speed slowed down to below 400KHz for eeprom
   
   streamCmdArray[0] = 0; // number of stream devices is zero
   
@@ -86,7 +84,7 @@ void loop()
   // don't use interrupts
   // don't use timer1
   pfControl(); // TODO : call pfControl from Timer3 interrupt. Set main loop free.
-  delay(500);
+  delay(20);
 }
 
 /*
@@ -147,21 +145,47 @@ void pfControl()
         // Read command after the communication starts
         receivedCmd = Serial.read();
       else {
+        
         switch (receivedCmd)
-        {
+        {          
+          case CMD_SET_I2C_SPEED: /* |START|Cmd|Speed[4]|CRC|End| */ 
+            if (Serial.available() > 1)
+            {
+              char buffer[6];
+              if (receiveBytes(6,buffer))
+              {
+                lwi2c.reset_last_error();
+                
+                unsigned long i2c_speed = 0;
+                unsigned int n1 = ((buffer[0]<<8) + buffer[1]) & 0xFFFF;
+                unsigned int n2 = ((buffer[2]<<8) + buffer[3]) & 0xFFFF;
+                //i2c_speed = (unsigned long)(((unsigned long)(((unsigned long)buffer[1]<<16) + ((unsigned long)buffer[0]<<24)) + (buffer[3]) + (buffer[2]<<8)) & 0xFFFFFFFF);
+                i2c_speed = (((unsigned long)n1)<<16);
+                i2c_speed += n2;
+                lwi2c.i2c_set_speed(i2c_speed);
+                
+                commOK(receivedCmd);                
+                startReceive = false;
+                receivedCmd = CMD_NULL;
+              } else 
+                commError();
+            }
+            break;
           case CMD_STREAM_ON: /* |START|Cmd|On|CRC|End| */ 
             if (Serial.available() > 1)
             {
               char buffer[3];
               if (receiveBytes(3,buffer))
               {
+                lwi2c.reset_last_error();
+                
                 // Start stream if On is CMD_OK
                 if (buffer[0]==0x00)
                   setStream(false);
                 else
                   setStream(true);
                 
-                commOK();
+                commOK(receivedCmd);
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -174,10 +198,12 @@ void pfControl()
               char buffer[2];
               if (receiveBytes(2,buffer))
               {
+                lwi2c.reset_last_error();
+                
                 // Reset stream buffer
                 streamReset();
                 
-                commOK();
+                commOK(receivedCmd);
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -190,11 +216,13 @@ void pfControl()
               char buffer[4];
               if (receiveBytes(4,buffer))
               {
+                lwi2c.reset_last_error();
+                
                 // Set timer period
                 unsigned int period = ((buffer[0]<<8) + buffer[1]) & 0xFFFF;
                 setPeriod(period);
                 
-                commOK();
+                commOK(receivedCmd);
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -207,10 +235,12 @@ void pfControl()
               char buffer[7];
               if (receiveBytes(7,buffer))
               {
+                lwi2c.reset_last_error();
+                
                 // Add command to stream buffer
                 streamAddCmd(buffer);
                 
-                commOK();
+                commOK(receivedCmd);
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -223,17 +253,29 @@ void pfControl()
               char buffer[5];
               if (receiveBytes(5,buffer))
               {
+                lwi2c.reset_last_error();
+                
                 // Read data from i2c device
                 char* recBuf = pfReadBytes(buffer[0],buffer[1],buffer[2]);
                 
-                Serial.write(CMD_ANSWER);
+                Serial.write(CMD_DATA_ANSWER);
+                if (!lwi2c.get_last_error())
+                  Serial.write(buffer[2]+3);
+                else
+                  Serial.write(1+3);
+                  
+                Serial.write(receivedCmd); // echo command
                 // Send Data via UART
                 for (int dataCount = 0;dataCount<buffer[2];dataCount++)
                 {
                   Serial.write(recBuf[dataCount]);
                 }
-                
-                Serial.write(CMD_END);
+                char CRC = 0x00;
+                Serial.write(CRC);
+                if ( !lwi2c.get_last_error() )
+                  Serial.write(CMD_END);
+                else
+                  Serial.write(CMD_ESC);
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -246,6 +288,8 @@ void pfControl()
                 char buffer[4];
                 if ( receiveBytes(4,buffer) )
                 {
+                  lwi2c.reset_last_error();
+                  
                   char dataBuffer[buffer[2]];
                   Serial.readBytes(dataBuffer, buffer[2]);
                   if ( Serial.read() == CMD_END )
@@ -253,7 +297,10 @@ void pfControl()
                   else 
                     commError();
                     
-                  commOK();
+                  if ( !lwi2c.get_last_error() )
+                    commOK(receivedCmd);
+                  else
+                    commNOK(receivedCmd);
                   receivedCmd = CMD_NULL;
                   startReceive = false;
                 } else 
@@ -266,13 +313,115 @@ void pfControl()
               char buffer[6];
               if ( receiveBytes(6,buffer) )
               {
+                lwi2c.reset_last_error();
+                
                 char sendData[1];
                 char* recBuf = pfReadBytes(buffer[0],buffer[1],1);
                 sendData[0] = (buffer[3] & buffer[2]) | (~buffer[3] & recBuf[0]);
-                commOK();
-                pfWriteBytes(buffer[0], buffer[1], 1, sendData);
+                
+                if ( !lwi2c.get_last_error() )
+                    commOK(receivedCmd);
+                  else
+                    commNOK(receivedCmd);
+                
+                if ( !lwi2c.get_last_error() )
+                  pfWriteBytes(buffer[0], buffer[1], 1, sendData);
+                  
                 receivedCmd = CMD_NULL;
                 startReceive = false;
+              } else 
+                commError();
+            }
+            break;
+          case CMD_DATA_TEST:
+             /* |START|Cmd|Length|CRC|End| */
+            if (Serial.available() > 2)
+            {
+              char buffer[3];
+              if (receiveBytes(3,buffer))
+              {
+                // First data set
+                Serial.write(CMD_ANSWER);
+                Serial.write(buffer[0]+3);
+                Serial.write(receivedCmd); // echo command
+                // Send Data via UART
+                for (int testData = 0;testData<buffer[0];testData++)
+                  Serial.write(testData);
+                  
+                char CRC = 0x00;
+                Serial.write(CRC);
+                Serial.write(CMD_END);
+                
+                // Second data set
+                Serial.write(CMD_ANSWER);
+                Serial.write(buffer[0]+3);
+                Serial.write(receivedCmd); // echo command
+                // Send Data via UART
+                for (int testData = 0;testData<buffer[0];testData++)
+                  Serial.write(testData);
+                  
+                CRC = 0x00;
+                Serial.write(CRC);
+                Serial.write(CMD_END);
+                
+                // Third data set
+                Serial.write(CMD_ANSWER);
+                Serial.write(buffer[0]+3);
+                Serial.write(receivedCmd); // echo command
+                
+                delay(300);
+                
+                // Send Data via UART
+                for (int testData = 0;testData<buffer[0];testData++)
+                  Serial.write(testData);
+                  
+                CRC = 0x00;
+                Serial.write(CRC);
+                Serial.write(CMD_END);
+                
+                delay(500);
+                
+                // Fourth data set
+                
+                Serial.write(CMD_ANSWER);
+                Serial.write(buffer[0]+3);
+                Serial.write(receivedCmd); // echo command
+                // Send Data via UART
+                for (int testData = 0;testData<buffer[0];testData++)
+                  Serial.write(testData);
+                  
+                CRC = 0x00;
+                Serial.write(CRC);
+                //Serial.write(CMD_END);
+                
+                // Fifth data set 
+                Serial.write(CMD_ANSWER);
+                Serial.write(buffer[0]+3);
+                Serial.write(receivedCmd); // echo command
+                // Send Data via UART
+                for (int testData = 0;testData<buffer[0];testData++)
+                  Serial.write(testData);
+                  
+                CRC = 0x00;
+                Serial.write(CRC);
+                Serial.write(CMD_END);
+                
+                delay(500);
+                
+                // Sixth data set
+                Serial.write(CMD_ANSWER);
+                Serial.write(buffer[0]+3);
+                Serial.write(receivedCmd); // echo command
+                // Send Data via UART
+                for (int testData = 0;testData<buffer[0];testData++)
+                  Serial.write(testData);
+                  
+                CRC = 0x00;
+                Serial.write(CRC);
+                Serial.write(CMD_END);
+                
+                startReceive = false;
+                receivedCmd = CMD_NULL;
               } else 
                 commError();
             }
@@ -288,15 +437,18 @@ void pfControl()
 
 void streamAddCmd(char *buffer)
 {
-  int start = streamCmdArray[0]*STREAM_LENGTH+5;
+  int start = ((int)streamCmdArray[0]*STREAM_LENGTH)+5;
   for (int i=0;i<5;i++)
     streamCmdArray[start+i]=buffer[i];
   streamCmdArray[0]++;
+  
+  streamCmdArray[1]+=buffer[2]; // hold total number of bytes in this register
 }
 
 void streamReset()
 {
   streamCmdArray[0]=0;
+  streamCmdArray[1]=0;
 }
 
 void setPeriod(unsigned int period)
@@ -322,11 +474,8 @@ void setStream(boolean ON)
 */
 void heartBeat()
 {
-  
-  /*char* recBuf = pfReadBytes(0x53,0x32,1);
-  Serial.print("read buffer: ");
-  Serial.println(recBuf[0],DEC);*/
   Serial.write(CMD_STREAM_START);
+  Serial.write(streamCmdArray[1]+4+2);
   
   // Send 4 bytes timestamp
   time = millis(); // long
@@ -339,13 +488,14 @@ void heartBeat()
   {
     int start = 5 + (dev * STREAM_LENGTH);
     char* recBuf = pfReadBytes(streamCmdArray[start],streamCmdArray[start+1],streamCmdArray[start+2]);
-    Serial.write(recBuf);
+    for (int i=0;i<streamCmdArray[start+2];i++)
+      Serial.write(recBuf[i]);
   }
   
   char CRC = 0x00;
   Serial.write(CRC);
   Serial.write(CMD_STREAM_END);
-  blinkLed();
+  //blinkLed();
 }
 
 /*
@@ -354,12 +504,16 @@ void heartBeat()
 char* pfReadBytes(char devAddress, char regAddress, char length)
 {
   char sendData[1];
+  char* sendNull = {0x00};
   sendData[0]=regAddress;
-  i2c_start();
-  i2c_write(devAddress,1,(char*)sendData);
-  i2c_repeated_start();
-  char* receiveBuffer = i2c_read(devAddress,length);
-  i2c_stop();
+  lwi2c.i2c_start();
+  lwi2c.i2c_write(devAddress,1,(char*)sendData);
+  lwi2c.i2c_repeated_start();
+  char* receiveBuffer = lwi2c.i2c_read(devAddress,length);
+  lwi2c.i2c_stop();
+  
+  if (0x00 != lwi2c.get_last_error())
+    return sendNull;
   
   return receiveBuffer;
 }
@@ -372,113 +526,9 @@ void pfWriteBytes(char devAddress, char regAddress, char length, char* data)
   {
     sendData[charCount+1]=data[charCount];
   }
-  i2c_start();
-  i2c_write(devAddress,length+1,(char*)sendData);
-  i2c_stop();
-}
-
-char* i2c_read(char devAddress,char length)
-{
-  static char receiveBuffer[16];
-  // slave address to be written
-  char SLA_R = (devAddress << 1) | 1;
-    
-  // send address
-  TWDR = SLA_R; 
-  if (i2c_tx(SEND_CONDITION) != 0x40)
-    i2cError();
-  
-  for(int dataCount=0;dataCount<length;dataCount++)
-  {
-    if ((dataCount!=length-1))
-    {
-      if (i2c_tx(SEND_CONDITION) != 0x50)
-        i2cError();
-    } else {
-      if (i2c_tx(SEND_CONDITION_NACK) != 0x58)
-        i2cError();
-    }
-    receiveBuffer[dataCount] = TWDR;
-  }
-  
-  return receiveBuffer;
-}
-
-void i2c_write(char devAddress, char length, char* data)
-{
-  // slave address to be read
-  char SLA_W = (devAddress << 1);
-    
-  // send address
-  TWDR = SLA_W; 
-  if (i2c_tx(SEND_CONDITION) != 0x18)
-    i2cError();
-    
-  for (int dataCount = 0; dataCount<length; dataCount++)
-  {
-    TWDR = data[dataCount];
-    if (i2c_tx(SEND_CONDITION) != 0x28)
-      i2cError();
-  }
-}
-
-void i2c_start()
-{
-  // start I2C
-  if (i2c_tx(START_CONDITION) != 0x08)
-    i2cError();
-}
-
-void i2c_stop()
-{
-  i2c_tx(STOP_CONDITION);
-}
-
-void i2c_repeated_start()
-{
-  if (i2c_tx(REPEATED_START_CONDITION) != 0x10)
-    i2cError();
-}
-
-
-/*
-* Transmit I2C command
-* Communication start with START_CONDITION
-* SEND_CONDITION transmits command following with an ACK
-* SEND_CONDITION_NACK transmits command following with a NACK
-* STOP_CONDITION stops the communication and releases I2C line
-* REPEATED_START_CONDITION starts another communication without
-* stoping the current one. It is required to read I2C device. Master
-* writes to the device address and register address first. Then,
-* after REPEATED_START_CONDITION, it listens the device.
-*/
-char i2c_tx(char mode)
-{
-  //TWCR: TWINT|TWEA|TWSTA|TWSTO|TWWC|TWEN|-|TWIE
-  delay(0); // TODO: if this line is removed, the code won't work!!
-  switch(mode)
-  {
-    case START_CONDITION:
-      TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
-      break;
-    case SEND_CONDITION:
-      TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWEA);
-      break;
-    case SEND_CONDITION_NACK:
-      TWCR = (1<<TWINT) | (1<<TWEN);
-      break;
-    case STOP_CONDITION:
-      TWCR = (1<<TWINT) | (0<<TWSTA) | (1<<TWSTO) | (1<<TWEN);
-      break;
-    case REPEATED_START_CONDITION:
-      TWCR = (1<<TWINT) | (1<<TWSTA) | (0<<TWSTO) | (1<<TWEN);
-      break;
-  }   
-  
-  if ((mode != STOP_CONDITION))
-    while (!(TWCR & (1<<TWINT)));// wait for command complete
-    
-  return (TWSR & 0xF8);
+  lwi2c.i2c_start();
+  lwi2c.i2c_write(devAddress,length+1,(char*)sendData);
+  lwi2c.i2c_stop();
 }
 
 /*
@@ -498,38 +548,30 @@ void blinkLed()
   blinkCounter++;
 }
 
-void i2cError()
-{
-  digitalWrite( ledb, HIGH );
-}
-
 void commError()
 {
   // Error in UART communication
   receivedCmd = CMD_NULL;
   startReceive = false;
+  commNOK(receivedCmd);
 }
 
-void commOK()
+void commOK(char command)
 {
-  Serial.write(CMD_ANSWER);                
+  Serial.write(CMD_ANSWER);
+  Serial.write(3);
+  Serial.write(command);
   Serial.write(CMD_OK);
   Serial.write(CMD_END);
 }
 
-void disableInterrupt()
+void commNOK(char command)
 {
-  /*Timer1.detachInterrupt();
-  Timer1.stop();*/
-}
-
-void enableInterrupt(long period)
-{
-  /*Timer1.initialize(period);
-  
-  // attach timer interrupt
-  Timer1.attachInterrupt(heartBeat);*/
-
+  Serial.write(CMD_ANSWER);
+  Serial.write(3);
+  Serial.write(command);
+  Serial.write((byte)CMD_NULL);
+  Serial.write(CMD_ESC);
 }
 
 boolean receiveBytes(int length,char* buffer)
