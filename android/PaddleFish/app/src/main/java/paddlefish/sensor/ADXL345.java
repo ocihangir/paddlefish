@@ -9,8 +9,8 @@ public class ADXL345 extends GenSensor{
 	private static final int AXIS = 3;
 	CommController com;
 	
-	public ADXL345(SensorCategory c, String devname) throws Exception {
-		super(c, devname);
+	public ADXL345() throws Exception {
+		super(SensorCategory.ACC, "ADXL345");
 		// TODO Auto-generated constructor stub
 		com = CommController.getInstance();
 		this.startMeasuring();

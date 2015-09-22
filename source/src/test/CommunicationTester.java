@@ -194,7 +194,7 @@ public class CommunicationTester
 		
 		System.out.println("Reading ADXL345 ID...");
 		
-		ADXL345 adSens = new ADXL345(SensorCategory.ACC, "ADXL345");
+		ADXL345 adSens = new ADXL345();
 		
 		byte hexAdd = (byte) (adSens.getI2cInf().getActiveDeviceAddr()&0xff);
 		byte devIdAdd =  (byte) (adSens.getIdentInfo().deviceIDAddress&0xff);
@@ -228,7 +228,7 @@ public class CommunicationTester
 	{
 		System.out.println("-Testing Power ADXL345-");
 		
-		ADXL345 adSens = new ADXL345(SensorCategory.ACC, "ADXL345");
+		ADXL345 adSens = new ADXL345();
 		
 		byte hexAdd = (byte) (adSens.getI2cInf().getActiveDeviceAddr()&0xff);
 		

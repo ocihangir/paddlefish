@@ -37,6 +37,8 @@ public class CommController implements CommControllerInterface
 		if(instance == null) 
 	      {
 	         instance = new CommController();
+	         // TODO: Windows ??
+	         instance.connect("COM6", 115200);
 	      }
 	      return instance;
 	}

@@ -10,13 +10,18 @@ import org.xml.sax.SAXException;
 
 import paddlefish.comm.I2CComm;
 import paddlefish.comm.SPIComm;
+import paddlefish.def.ControlType;
 import paddlefish.def.SensorCategory;
 import paddlefish.def.SensorControl;
 import paddlefish.def.SensorIdent;
 import paddlefish.def.SensorOutput;
+import paddlefish.hal.CommControllerInterface;
+import paddlefish.hal.CommReceiverInterface;
 import paddlefish.io.SensorXMLReader;
+import paddlefish.protocol.CommConstants;
+import paddlefish.protocol.CommController;
 
-public abstract class GenSensor {
+public abstract class GenSensor implements CommReceiverInterface {
 	// identification data read from XML file
 	protected SensorIdent identInfo;
 	// Null, if device does not support I2C
@@ -31,7 +36,26 @@ public abstract class GenSensor {
 	protected boolean isOpen;
 	// ? we need a thread for this
 	protected double curValue;
+	/*
+	 * Communication Variables
+	 */
+	// id for communication
+	protected int commId;
+	// waiting for a message to be received lock
+	private final Object rcvlock = new Object();
+	// received byte
+	private byte[] rcvBuffer;
 	
+	protected CommController com;
+	
+	public int getCommId() {
+		return commId;
+	}
+
+	public void setCommId(int commId) {
+		this.commId = commId;
+	}
+
 	private void initFromXML(SensorCategory c, String devname) throws SAXException, IOException, ParserConfigurationException, URISyntaxException
 	{
 		SensorXMLReader reader = new SensorXMLReader(c, devname);
@@ -43,14 +67,19 @@ public abstract class GenSensor {
 		this.controlLst = reader.getControlLst();
 	}
 	
-	public GenSensor(SensorCategory c, String devname) throws SAXException, IOException, ParserConfigurationException, URISyntaxException
+	public GenSensor(SensorCategory c, String devname) throws Exception
 	{
 		this.identInfo = new SensorIdent();
 		this.outputLst = new ArrayList<SensorOutput>();
 		this.controlLst = new ArrayList<SensorControl>();
 		this.isOpen = false;
 		this.curValue=0;
+		this.commId = -1;
 		this.initFromXML(c, devname);
+		/* Communication */
+		com = CommController.getInstance();
+		com.addCommandReceiver(this);
+		com.addDataReceiver(this);
 	}
 	
 	public boolean getStatus()
@@ -78,6 +107,35 @@ public abstract class GenSensor {
 		return identInfo;
 	}
 	
+	public boolean checkPhysicalValid() throws Exception
+	{
+		byte register = this.identInfo.deviceIDAddress;
+		byte devId_gold = this.identInfo.deviceID;	
+		// We set length as 1 ->> may be different check later
+		com.readByteArray((byte)(this.getI2cInf().getActiveDeviceAddr()&0xff), register, 1, this.commId);
+		// wait for the message to arrive
+		synchronized(rcvlock) {
+		    try {
+		    	System.out.println("Waiting for receive lock");
+		        // Calling wait() will block this thread until another thread calls notify() on the object.
+		    	rcvlock.wait();
+		    	System.out.println("Receive lock notified!");
+		    	// check received buffer
+		    	if(rcvBuffer.length>2)
+		    	{
+		    		System.out.println("Comparing device id with received buffer");
+		    		byte devId_phy = this.rcvBuffer[3];
+		    		// empty the received buffer
+		    		return (devId_phy==devId_gold);
+		    	}
+		    } 
+		    catch (InterruptedException e) {
+		        // Happens if someone interrupts your thread.
+		    }
+		}
+		return false;
+	}
+	
 	/*******
 	 * Abstract Methods
 	 * @throws InterruptedException 
@@ -91,4 +149,75 @@ public abstract class GenSensor {
 	// Read the value of the sensor continuously
 	public abstract void getStreamData();
 	//TODO: Imagine more...
+	
+	public void commCommandReceiver(byte[] buffer, Object receiver) 
+	{
+		if((int)receiver==this.commId)
+		{
+			System.out.println("Command Received in GenSensor");
+			synchronized(rcvlock) 
+			{
+				//TODO : Length check
+				if(buffer!=null && buffer.length>=2)
+				{
+					System.out.println("Buffer is OK");
+					// get command type
+					byte cmdType = buffer[2];
+					switch(cmdType)
+					{
+						case(CommConstants.CMD_READ_BYTES):
+							System.out.println("Command Type is CMD_READ_BYTES");
+							rcvBuffer = buffer;
+							break;
+						case(CommConstants.CMD_WRITE_BYTES):
+							rcvBuffer = buffer;
+							break;
+						case(CommConstants.CMD_WRITE_BITS):
+							rcvBuffer = buffer;
+							break;
+						default:
+							break;
+					}
+					System.out.println("Notifying receive lock");
+					rcvlock.notify();
+				}			
+			}
+		}
+		
+	}
+	
+	public void commDataReceiver(byte[] buffer, Object receiver) 
+	{
+		if((int)receiver==this.commId)
+		{
+			System.out.println("Command Received in GenSensor");
+			synchronized(rcvlock) 
+			{
+				//TODO : Length check
+				if(buffer!=null && buffer.length>=2)
+				{
+					System.out.println("Buffer is OK");
+					// get command type
+					byte cmdType = buffer[2];
+					switch(cmdType)
+					{
+						case(CommConstants.CMD_READ_BYTES):
+							System.out.println("Command Type is CMD_READ_BYTES");
+							rcvBuffer = buffer;
+							break;
+						case(CommConstants.CMD_WRITE_BYTES):
+							rcvBuffer = buffer;
+							break;
+						case(CommConstants.CMD_WRITE_BITS):
+							rcvBuffer = buffer;
+							break;
+						default:
+							break;
+					}
+					System.out.println("Notifying receive lock");
+					rcvlock.notify();
+				}			
+			}
+		}
+	}
 }
