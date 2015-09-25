@@ -106,11 +106,6 @@
 			<locationURI>PARENT-1-PROJECT_LOC/android/PaddleFish/app/src/main/java/paddlefish/def/SensorOutput.java</locationURI>
 		</link>
 		<link>
-			<name>src/paddlefish/hal/Bluetooth.java</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/android/PaddleFish/app/src/main/java/paddlefish/hal/Bluetooth.java</locationURI>
-		</link>
-		<link>
 			<name>src/paddlefish/hal/CommControllerInterface.java</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/android/PaddleFish/app/src/main/java/paddlefish/hal/CommControllerInterface.java</locationURI>
