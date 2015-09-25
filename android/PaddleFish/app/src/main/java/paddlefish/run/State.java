@@ -77,7 +77,24 @@ public class State
 			System.out.println("Ooops :( ");
 		}
 		
-		try {Thread.sleep(2000);} catch (InterruptedException ie) {} // Wait for communication channel is up
+		//testSens.powerUp();
+		
+		boolean ansUpdate = testSens.updateOutputValues();
+		if(ansUpdate)
+		{
+			System.out.println("Output Update Success!");
+			for (int i=0; i<testSens.getOutputLst().size(); i++)
+			{
+				byte[] outVal = testSens.getOutputLst().get(i).getOutputValue();
+				System.out.print("Output Value " + i + " : ");
+				for (int j=0; j<outVal.length;j++)
+					System.out.print(String.format("0x%02X", outVal[j]) + " ");
+				
+				System.out.println("");
+			}
+		}
+		
+		/*try {Thread.sleep(2000);} catch (InterruptedException ie) {} // Wait for communication channel is up
 		
 		GenSensor testSens2 = stTester.addDevice("ADXL345");
 		if(testSens2!=null)
@@ -87,7 +104,7 @@ public class State
 		else
 		{
 			System.out.println("Ooops :( ");
-		}
+		}*/
 		
 		System.exit(0);
 	}
