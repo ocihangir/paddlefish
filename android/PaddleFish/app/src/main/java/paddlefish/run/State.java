@@ -3,6 +3,7 @@ package paddlefish.run;
 import java.util.ArrayList;
 
 import paddlefish.def.SensorCategory;
+import paddlefish.io.SensorXMLReader;
 import paddlefish.sensor.*;
 
 public class State 
@@ -12,6 +13,24 @@ public class State
 	// number of sensors currently in the system
 	private int sensCnt;
 	// Return active sensor list
+	
+	public ArrayList<SensorXMLReader> getAvailableSensorList()
+	{
+		ArrayList<SensorXMLReader> availableSensors = null;
+		
+		// TODO : automatize sensor listing process
+		
+		SensorCategory sensCategory = null;
+		// ArrayList<String> categories = sensCategory.getCategoryList();
+		
+		SensorXMLReader xmlReader = new SensorXMLReader(sensCategory.getCategory("Accelerometer"),"ADXL345");
+		availableSensors.add(xmlReader);
+		
+		xmlReader = new SensorXMLReader(sensCategory.getCategory("Gyroscope"),"L3GD20");
+		availableSensors.add(xmlReader);
+		
+		return availableSensors;
+	}
 	
 	public State()
 	{
