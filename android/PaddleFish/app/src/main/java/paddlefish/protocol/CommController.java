@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.naming.CommunicationException;
-
 import paddlefish.hal.CommControllerInterface;
 import paddlefish.hal.CommReceiverInterface;
 import paddlefish.hal.HAL;
@@ -44,7 +42,7 @@ public class CommController implements CommControllerInterface
 	         // Linux 
 	         instance.connect("/dev/ttyACM1", 115200);
 	         if (instance == null)
-	        	 throw new CommunicationException("Couldn't open COM port!");
+	        	 throw new Exception("Couldn't open COM port!");
 	      }
 	      return instance;
 	}
