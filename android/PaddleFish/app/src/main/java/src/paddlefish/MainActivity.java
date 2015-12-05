@@ -1,8 +1,11 @@
 package src.paddlefish;
 
-
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-import android.hardware.Sensor;
+import android.content.IntentFilter;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +16,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import paddlefish.def.SensorCategory;
 import paddlefish.run.State;
@@ -31,6 +35,11 @@ public class MainActivity extends AppCompatActivity {
     public static SensorListAdapter listAdapter;
     private FloatingActionButton fab;
     private ChooseSensorCategoryDialog dialog;
+
+    BluetoothAdapter mBlueToothAdapter = null;
+
+    private final static int REQUEST_ENABLE_BT = 1;
+    private final static int REQUEST_STATE_CHANGE_BT = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     public void dissmissDialogAndAddItem(SensorItem sensorItem) {
         dialog.dismiss();
         try {
@@ -90,6 +100,5 @@ public class MainActivity extends AppCompatActivity {
         }
         return state;
     }*/
-
 
 }

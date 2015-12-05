@@ -38,10 +38,9 @@ public class CommController implements CommControllerInterface
 	      {
 	         instance = new CommController();
 	         // TODO: Windows ??
-	         // instance.connect("COM6", 115200);
+			//instance.connect("COM6", 115200);
 	         // Linux 
-	         instance.connect("/dev/ttyACM0", 115200);
-	         
+	         //instance.connect("/dev/ttyACM0", 115200);
 	      }
 	      return instance;
 	}

@@ -10,6 +10,8 @@ import org.xml.sax.SAXException;
 
 import paddlefish.comm.I2CComm;
 import paddlefish.comm.SPIComm;
+import paddlefish.def.ControlInput;
+import paddlefish.def.ControlInputValue;
 import paddlefish.def.ControlType;
 import paddlefish.def.SensorCategory;
 import paddlefish.def.SensorControl;
@@ -82,6 +84,22 @@ public abstract class GenSensor implements CommReceiverInterface {
 		com.addDataReceiver(this);
 	}
 	
+	public GenSensor() throws Exception
+	{
+		this.identInfo = new SensorIdent();
+		this.outputLst = new ArrayList<SensorOutput>();
+		this.controlLst = new ArrayList<SensorControl>();
+		this.i2cInf = new I2CComm();
+		this.spiInf = new SPIComm();
+		this.isOpen = false;
+		this.curValue=0;
+		this.commId = -1;
+		/* Communication */
+		com = CommController.getInstance();
+		com.addCommandReceiver(this);
+		com.addDataReceiver(this);
+	}
+	
 	public boolean getStatus()
 	{
 		return isOpen;
@@ -134,6 +152,45 @@ public abstract class GenSensor implements CommReceiverInterface {
 		    }
 		}
 		return false;
+	}
+	
+	public boolean updateOutputValues() throws Exception
+	{
+		int outputCount = this.outputLst.size();
+		
+		for ( int outputIndex = 0; outputIndex<outputCount; outputIndex++)
+		{
+			byte register = this.outputLst.get(outputIndex).register;
+			int length = this.outputLst.get(outputIndex).length;
+			
+			com.readByteArray((byte)(this.getI2cInf().getActiveDeviceAddr()&0xff), register, length, this.commId);
+			// wait for the message to arrive
+			synchronized(rcvlock) {
+			    try {
+			    	System.out.println("Waiting for receive lock");
+			        // Calling wait() will block this thread until another thread calls notify() on the object.
+			    	rcvlock.wait();
+			    	System.out.println("Receive lock notified!");
+			    	// check received buffer
+			    	int msgLength = this.rcvBuffer[1];
+			    	if(rcvBuffer.length==msgLength+2)
+			    	{
+			    		byte[] outputData = new byte[msgLength-3];
+			    		System.arraycopy(rcvBuffer, 3, outputData, 0, msgLength-3);
+			    		this.outputLst.get(outputIndex).setOutputValue(outputData);
+			    	} else {
+			    		// TODO: log 
+			    		System.out.println("The message length and length data mismatch!");
+			    		return false;
+			    	}
+			    } 
+			    catch (InterruptedException e) {
+			        // Happens if someone interrupts your thread.
+			    	return false;
+			    }
+			}
+		}
+		return true;
 	}
 	
 	/*******
@@ -222,4 +279,61 @@ public abstract class GenSensor implements CommReceiverInterface {
 			}
 		}
 	}
+
+	public void testIdentificationInfo(SensorIdent ident)
+	{
+		System.out.println("IDENTIFICATION INFO");
+		// Please note that all hexadecimal numbers are kept as decimals
+		System.out.println("Device ID: "+ident.deviceID+" , DeviceName: "+ident.devName+" , Manufacturer: "+ident.manuf + " , Category: "+ident.categ.getFolderName());
+	}
+	
+	public void testCommunicationInfo(I2CComm i2cc, SPIComm spic)
+	{
+		System.out.println("COMMUNICATION INFO");
+		if(i2cc!=null)
+		{
+			System.out.println("Number of available addresses: "+i2cc.getDevAddrCnt()+"   , DeviceAddressInformation  "+i2cc.getDevAddrInf().toString());
+		}
+		else
+		{
+			System.out.println("This device does not support I2CComm");
+		}
+		if(spic!=null)
+		{
+			System.out.println("No idea about SPI ");
+		}
+		else
+		{
+			System.out.println("This device does not support SPIComm");
+		}
+	}
+	
+	public void testOutputInfo(ArrayList<SensorOutput> outputInfo)
+	{
+		System.out.println("OUTPUT INFO");
+		for(SensorOutput sO:outputInfo)
+		{
+			System.out.println("Available Output:");
+			System.out.println(sO.descr +" Type:  "+sO.dType+"  Length: "+sO.length+" Resolution: "+ sO.res+" bits"+" LSB: "+ sO.lsb+" Reg: "+ sO.register);
+		}
+	}
+	
+	public void testControlInfo(ArrayList<SensorControl> controlInfo)
+	{
+		System.out.println("CONTROL INFO");
+		for(SensorControl sc:controlInfo)
+		{
+			System.out.println("Control Type: "+ sc.type.getDescr());
+			for(ControlInput si:sc.cInputs)
+			{
+				System.out.println(si.name + "Interface Type: " +si.interfaceType+ " Number of Options: "+ si.noOptions + "  Default Option: "+ si.defOption+" register: "+ si.register);
+				System.out.println("Options:");
+				for(ControlInputValue civ:si.inValues)
+				{
+					System.out.println("Id: "+civ.id+" Value:  "+civ.value);
+				}
+			}
+		}
+	}
+
 }

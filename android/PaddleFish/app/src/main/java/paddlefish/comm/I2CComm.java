@@ -11,7 +11,7 @@ public class I2CComm {
 	// Byte: Device address 
 	// Boolean: If the address is active
 	private HashMap<Byte,Boolean> devAddrInf;
-	
+
 	// Default constructor
 	public I2CComm()
 	{
@@ -25,7 +25,7 @@ public class I2CComm {
 		this.devAddrCnt = devAddrCnt;
 		devAddrInf = new HashMap<Byte,Boolean>();
 	}
-	
+
 	public int getDevAddrCnt() {
 		return devAddrCnt;
 	}
@@ -41,7 +41,7 @@ public class I2CComm {
 	public void setDevAddrInf(HashMap<Byte, Boolean> devAddrInf) {
 		this.devAddrInf = devAddrInf;
 	}
-	
+
 	public void addDeviceAddr(Byte addr, boolean isActive)
 	{
 		// If map is already full do not add
@@ -55,25 +55,37 @@ public class I2CComm {
 			devAddrInf.put(addr, isActive);
 		}
 	}
-	
+
 	/* Only one of the device addresses is active. Get the adress of the active one */
 	public Byte getActiveDeviceAddr()
 	{
 		if(this.devAddrInf!=null)
 		{
-		    for (Entry<Byte, Boolean> entry : devAddrInf.entrySet()) 
-		    {
-		        if (Objects.equals(true, entry.getValue())) 
-		        {
-		            return entry.getKey();
-		        }
-		    }
-		    //TODO:Log
-		    System.out.println("No active device address found");
+			for (Entry<Byte, Boolean> entry : devAddrInf.entrySet()) 
+			{
+				if (Objects.equals(true, entry.getValue())) 
+				{
+					return entry.getKey();
+				}
+			}
+			//TODO:Log
+			System.out.println("No active device address found");
 		}
 		//TODO:Log
 		System.out.println("Device Info is not available");
 		return null;
 	}
-	
+
+	public void testI2CCommunicationInfo(I2CComm i2cc)
+	{
+		System.out.println("I2C INFO");
+		if(i2cc!=null)
+		{
+			System.out.println("Number of available addresses: "+i2cc.getDevAddrCnt()+"   , DeviceAddressInformation  "+i2cc.getDevAddrInf().toString());
+		}
+		else
+		{
+			System.out.println("This device does not support I2CComm");
+		}
+	}
 }

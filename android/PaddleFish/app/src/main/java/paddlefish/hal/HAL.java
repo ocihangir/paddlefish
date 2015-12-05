@@ -13,7 +13,7 @@ import paddlefish.protocol.CommConstants;
 /*Observer Pattern is used*/
 public class HAL implements CommRxInterface {
 	private static HAL instance = null;
-	USB usbComm;
+	Bluetooth blueComm;
 	private List<CommControllerInterface> dataReceiverList = new ArrayList<CommControllerInterface>();
 	private List<CommControllerInterface> commandReceiverList = new ArrayList<CommControllerInterface>();
 	private List<CommStreamerInterface> streamReceiverList = new ArrayList<CommStreamerInterface>();
@@ -23,11 +23,11 @@ public class HAL implements CommRxInterface {
 	
 	protected HAL() throws Exception
 	{
-		/*if (usbComm == null)
+		if (blueComm == null)
 		{
-			usbComm = new USB();
-			usbComm.addReceiver(this);
-		}*/
+			blueComm = new Bluetooth();
+			blueComm.addReceiver(this);
+		}
 	}
 	
 	public static HAL getInstance() throws Exception {
