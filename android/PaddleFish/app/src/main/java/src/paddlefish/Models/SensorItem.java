@@ -5,5 +5,6 @@ package src.paddlefish.Models;
  */
 public class SensorItem {
 
-    public String name;
+    public String categoryName;
+    public String sensorName;
 }

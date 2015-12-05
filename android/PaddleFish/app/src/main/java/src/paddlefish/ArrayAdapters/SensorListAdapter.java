@@ -10,17 +10,19 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import paddlefish.sensor.GenSensor;
+import src.paddlefish.Models.GenSensorItem;
 import src.paddlefish.Models.SensorItem;
 import src.paddlefish.R;
 
 /**
  * Created by USER on 22.09.2015.
  */
-public class SensorListAdapter extends ArrayAdapter<SensorItem> {
-    private final List<SensorItem> objects;
+public class SensorListAdapter extends ArrayAdapter<GenSensorItem> {
+    private final List<GenSensorItem> objects;
     private final Activity context;
 
-    public SensorListAdapter(Activity context, int resource, List<SensorItem> objects) {
+    public SensorListAdapter(Activity context, int resource, List<GenSensorItem> objects) {
         super(context, resource, objects);
         this.objects = objects;
         this.context = context;
@@ -28,7 +30,8 @@ public class SensorListAdapter extends ArrayAdapter<SensorItem> {
 
     private static class SensorItemHolder{
         ImageView imageView;
-        TextView textView;
+        TextView categoryName;
+        TextView sensorName;
     }
 
     @Override
@@ -49,14 +52,16 @@ public class SensorListAdapter extends ArrayAdapter<SensorItem> {
             holder = new SensorItemHolder();
 
             holder.imageView = (ImageView) convertView.findViewById(R.id.listitem_sensor_imageView);
-            holder.textView = (TextView) convertView.findViewById(R.id.listitem_sensor_textView);
+            holder.categoryName = (TextView) convertView.findViewById(R.id.listitem_sensor_category_textView);
+            holder.sensorName = (TextView)convertView.findViewById(R.id.listitem_sensor_name_textView);
             convertView.setTag(holder);
         }else{
             holder = (SensorItemHolder) convertView.getTag();
         }
 
-        SensorItem item = objects.get(position);
-        holder.textView.setText(item.name);
+        GenSensorItem item = objects.get(position);
+        holder.categoryName.setText(item.sensorItem.categoryName);
+        holder.sensorName.setText(item.sensorItem.sensorName);
 
         return convertView;
     }
