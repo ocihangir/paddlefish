@@ -27,6 +27,22 @@ public class SensorOutput
 	// data type of output
 	public String dType;
 
+	/**
+	 *  Sensor physical values
+	 */
+	private byte[] outputValue;
+	
+	public byte[] getOutputValue()
+	{
+		return outputValue;		
+	}
+	
+	public void setOutputValue(byte[] value)
+	{
+		
+		outputValue = value.clone();		
+	}
+	
 	public SensorOutput() {
 		// TODO Auto-generated constructor stub
 		this.outputId = DEF_ID;
