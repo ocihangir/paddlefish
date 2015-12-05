@@ -46,4 +46,11 @@ public class SensorIdent
 		this.unit = ident.unit;
 	}
 	
+	// Tester
+	public void testIdentificationInfo(SensorIdent ident)
+	{
+		System.out.println("IDENTIFICATION INFO");
+		// Please note that all hexadecimal numbers are kept as decimals
+		System.out.println("Device ID: "+ident.deviceID+" , DeviceName: "+ident.devName+" , Manufacturer: "+ident.manuf + " , Category: "+ident.categ.getFolderName());
+	}
 }

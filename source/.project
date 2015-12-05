@@ -176,6 +176,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/android/PaddleFish/app/src/main/java/paddlefish/sensor/GenSensor.java</locationURI>
 		</link>
 		<link>
+			<name>src/paddlefish/sensor/TestSensor.java</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/android/PaddleFish/app/src/main/java/paddlefish/sensor/TestSensor.java</locationURI>
+		</link>
+		<link>
 			<name>src/paddlefish/sensor/L3GD20.java</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/android/PaddleFish/app/src/main/java/paddlefish/sensor/L3GD20.java</locationURI>

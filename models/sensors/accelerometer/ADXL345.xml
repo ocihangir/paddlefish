@@ -47,12 +47,12 @@
 			</input>			
 		</Control>
 		<Control type="measure" descr="Measure Activity">
-			<input name="measure" type="checkbox" register="2D" bit="3" len="1" def="0">
+			<input name="measure" type="checkbox" register="2D" bit="3" len="1" cnt="1" def="0">
 				<val id="0">true</val>
 			</input>			
 		</Control>
 		<Control type="sleep" descr="Device Sleep">
-			<input name="sleep" type="checkbox" register="2D" bit="2" len="1" def="0">
+			<input name="sleep" type="checkbox" register="2D" bit="2" len="1" cnt="1" def="0">
 				<val id="0">false</val>
 			</input>				
 		</Control>

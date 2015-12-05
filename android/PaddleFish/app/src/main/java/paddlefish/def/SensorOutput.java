@@ -1,5 +1,7 @@
 package paddlefish.def;
 
+import java.util.ArrayList;
+
 public class SensorOutput 
 {
 	private static final int DEF_ID = -1;
@@ -24,7 +26,7 @@ public class SensorOutput
 	public byte register;
 	// data type of output
 	public String dType;
-	
+
 	public SensorOutput() {
 		// TODO Auto-generated constructor stub
 		this.outputId = DEF_ID;
@@ -35,7 +37,7 @@ public class SensorOutput
 		this.register = DEF_REG;
 		this.dType = DEF_DATATYPE;
 	}
-	
+
 	public SensorOutput(SensorOutput output)
 	{
 		this();
@@ -46,5 +48,11 @@ public class SensorOutput
 		this.res = output.res;
 		this.register = output.register;	
 		this.dType = output.dType;
+	}
+
+	public void testOutputInfo(SensorOutput so)
+	{
+		System.out.println("Available Output:");
+		System.out.println(so.descr +" Type:  "+so.dType+"  Length: "+so.length+" Resolution: "+ so.res+" bits");
 	}
 }
