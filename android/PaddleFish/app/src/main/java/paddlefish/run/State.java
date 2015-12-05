@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import paddlefish.def.SensorCategory;
+import paddlefish.io.SensorXMLReader;
 import paddlefish.sensor.*;
 
 public class State {
@@ -16,10 +17,29 @@ public class State {
 	// TODO: Do proper handling for folder names: -> Ozan!!!
 	private static String windowsProjFolder = "D:\\Others\\PaddleFish\\paddlefish";
 
-	public State() {
+	
+	public ArrayList<SensorXMLReader> getAvailableSensorList()
+	{
+		ArrayList<SensorXMLReader> availableSensors = null;
+		
+		// TODO : automatize sensor listing process
+		
+		SensorCategory sensCategory = null;
+		// ArrayList<String> categories = sensCategory.getCategoryList();
+		
+		SensorXMLReader xmlReader = new SensorXMLReader(sensCategory.getCategory("Accelerometer"),"ADXL345");
+		availableSensors.add(xmlReader);
+		
+		xmlReader = new SensorXMLReader(sensCategory.getCategory("Gyroscope"),"L3GD20");
+		availableSensors.add(xmlReader);
+		
+		return availableSensors;
+	}
+	
+	public State()
+	{
 		sensCnt = 0;
 		activeSensLst = new ArrayList<GenSensor>();
-
 	}
 
 	public ArrayList<GenSensor> getActiveSensLst() {

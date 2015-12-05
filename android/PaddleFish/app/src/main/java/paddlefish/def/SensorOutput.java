@@ -49,7 +49,7 @@ public class SensorOutput
 		this.register = output.register;	
 		this.dType = output.dType;
 	}
-
+	
 	public void testOutputInfo(SensorOutput so)
 	{
 		System.out.println("Available Output:");

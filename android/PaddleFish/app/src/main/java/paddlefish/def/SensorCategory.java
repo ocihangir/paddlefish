@@ -1,5 +1,7 @@
 package paddlefish.def;
 
+import java.util.ArrayList;
+
 /* This enum defines constants for sensor categories this project implements*/
 public enum SensorCategory {
 	GYRO ("gyroscope"),
@@ -36,5 +38,19 @@ public enum SensorCategory {
 			default:
 				return UNK;
 		}
+	}
+	
+	@SuppressWarnings("null")
+	public static ArrayList<String> getCategoryList()
+	{
+		ArrayList<String> categoryList = null;
+		
+		categoryList.add("Accelerometer");
+		categoryList.add("Gyroscope");
+		categoryList.add("Temperature");
+		categoryList.add("Compass");
+		
+		return categoryList;
+		
 	}
 }

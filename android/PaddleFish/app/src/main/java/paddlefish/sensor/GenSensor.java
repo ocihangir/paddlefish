@@ -154,6 +154,45 @@ public abstract class GenSensor implements CommReceiverInterface {
 		return false;
 	}
 	
+	public boolean updateOutputValues() throws Exception
+	{
+		int outputCount = this.outputLst.size();
+		
+		for ( int outputIndex = 0; outputIndex<outputCount; outputIndex++)
+		{
+			byte register = this.outputLst.get(outputIndex).register;
+			int length = this.outputLst.get(outputIndex).length;
+			
+			com.readByteArray((byte)(this.getI2cInf().getActiveDeviceAddr()&0xff), register, length, this.commId);
+			// wait for the message to arrive
+			synchronized(rcvlock) {
+			    try {
+			    	System.out.println("Waiting for receive lock");
+			        // Calling wait() will block this thread until another thread calls notify() on the object.
+			    	rcvlock.wait();
+			    	System.out.println("Receive lock notified!");
+			    	// check received buffer
+			    	int msgLength = this.rcvBuffer[1];
+			    	if(rcvBuffer.length==msgLength+2)
+			    	{
+			    		byte[] outputData = new byte[msgLength-3];
+			    		System.arraycopy(rcvBuffer, 3, outputData, 0, msgLength-3);
+			    		this.outputLst.get(outputIndex).setOutputValue(outputData);
+			    	} else {
+			    		// TODO: log 
+			    		System.out.println("The message length and length data mismatch!");
+			    		return false;
+			    	}
+			    } 
+			    catch (InterruptedException e) {
+			        // Happens if someone interrupts your thread.
+			    	return false;
+			    }
+			}
+		}
+		return true;
+	}
+	
 	/*******
 	 * Abstract Methods
 	 * @throws InterruptedException 

@@ -41,7 +41,6 @@ public class CommController implements CommControllerInterface
 			//instance.connect("COM6", 115200);
 	         // Linux 
 	         //instance.connect("/dev/ttyACM0", 115200);
-	         
 	      }
 	      return instance;
 	}
