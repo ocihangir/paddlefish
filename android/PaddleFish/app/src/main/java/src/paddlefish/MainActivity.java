@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     public static SensorListAdapter listAdapter;
     private FloatingActionButton fab;
     private ChooseSensorCategoryDialog dialog;
+    public State myState;
 
     BluetoothAdapter mBlueToothAdapter = null;
 
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        myState = new State();
 
 
 
@@ -83,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
     public void dissmissDialogAndAddItem(SensorItem sensorItem) {
         dialog.dismiss();
         try {
-            GenSensor sensor = State.getInstance().addDevice(sensorItem.sensorName);
+            GenSensor sensor = myState.addDevice(sensorItem.sensorName);
             GenSensorItem item = new GenSensorItem();
             item.sensorItem = sensorItem;
             item.genSensor = sensor;
