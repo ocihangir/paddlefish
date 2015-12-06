@@ -44,6 +44,7 @@ public class TestSensor extends GenSensor {
 		o3.res = 13;
 		o3.register = 0x36;
 		this.outputLst.add(o3);
+
 		/*Sensor Control 1*/
 		SensorControl c1 = new SensorControl();
 		c1.descr = "Power Down";
@@ -62,6 +63,7 @@ public class TestSensor extends GenSensor {
         ci.inValues.add(civ);
         c1.cInputs.add(ci);
 		this.controlLst.add(c1);
+
 		/*Sensor Control 2*/
 		SensorControl c2 = new SensorControl();
 		c2.descr = "Measure Activity";
@@ -80,10 +82,14 @@ public class TestSensor extends GenSensor {
         c2i.inValues.add(c2iv);
         c2.cInputs.add(c2i);
 		this.controlLst.add(c2);
+
+
+
 		/*Sensor Control 3*/
 		SensorControl c3 = new SensorControl();
 		c3.descr = "Go to sleep";
 		c2.type = ControlType.SLEEP;
+
 		ControlInput c3i = new ControlInput();
 		c3i.bit = 1;
 		c3i.defOption=0;
@@ -98,10 +104,13 @@ public class TestSensor extends GenSensor {
         c3i.inValues.add(c3iv);
         c3.cInputs.add(c3i);
 		this.controlLst.add(c3);
+
+
 		/*Sensor Control 4*/
 		SensorControl c4 = new SensorControl();
 		c4.descr = "Wake up the device";
 		c4.type = ControlType.WAKEUP;
+
 		ControlInput c4i = new ControlInput();
 		c4i.bit = 1;
 		c4i.defOption=0;

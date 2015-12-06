@@ -20,7 +20,7 @@ public class L3GD20 extends GenSensor {
 
 	public L3GD20() throws Exception
 	{
-		super(SensorCategory.GYRO, "L3GD20");
+		super();
 	}
 
 	/* (non-Javadoc)

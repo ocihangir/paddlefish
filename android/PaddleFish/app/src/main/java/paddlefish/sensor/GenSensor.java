@@ -1,6 +1,7 @@
 package paddlefish.sensor;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
@@ -58,30 +59,15 @@ public abstract class GenSensor implements CommReceiverInterface {
 		this.commId = commId;
 	}
 
-	private void initFromXML(SensorCategory c, String devname) throws SAXException, IOException, ParserConfigurationException, URISyntaxException
+	public void initFromXML(InputStream inputStr) throws SAXException, IOException, ParserConfigurationException, URISyntaxException
 	{
-		SensorXMLReader reader = new SensorXMLReader(c, devname);
+		SensorXMLReader reader = new SensorXMLReader(inputStr);
 		reader.readFile();
 		this.identInfo = reader.getIdentInfo();
 		this.i2cInf = reader.getI2cInf();
 		this.spiInf = reader.getSpiInf();
 		this.outputLst = reader.getOutputLst();
 		this.controlLst = reader.getControlLst();
-	}
-	
-	public GenSensor(SensorCategory c, String devname) throws Exception
-	{
-		this.identInfo = new SensorIdent();
-		this.outputLst = new ArrayList<SensorOutput>();
-		this.controlLst = new ArrayList<SensorControl>();
-		this.isOpen = false;
-		this.curValue=0;
-		this.commId = -1;
-		this.initFromXML(c, devname);
-		/* Communication */
-		com = CommController.getInstance();
-		com.addCommandReceiver(this);
-		com.addDataReceiver(this);
 	}
 	
 	public GenSensor() throws Exception

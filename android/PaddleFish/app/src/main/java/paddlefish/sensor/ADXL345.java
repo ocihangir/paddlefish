@@ -10,7 +10,7 @@ public class ADXL345 extends GenSensor {
 	CommController com;
 
 	public ADXL345() throws Exception {
-		super(SensorCategory.ACC, "ADXL345");
+		super();
 		// TODO Auto-generated constructor stub
 		com = CommController.getInstance();
 		this.startMeasuring();

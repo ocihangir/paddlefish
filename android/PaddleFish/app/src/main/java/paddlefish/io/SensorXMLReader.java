@@ -31,9 +31,6 @@ import java.io.File;
 
 public class SensorXMLReader 
 {
-	public static final String modelPath = "..\\..\\models\\sensors";
-	// XML file path
-	private String fName;
 	// identification data read from XML file
 	private SensorIdent identInfo;
 	// Null, if device does not support I2C
@@ -44,29 +41,19 @@ public class SensorXMLReader
 	private ArrayList<SensorOutput> outputLst;
 	// Control Information of Sensor
 	private ArrayList<SensorControl> controlLst;
-	
-	public SensorXMLReader(SensorCategory c, String devname) 
+	// Input Stream (read from assets)
+	private InputStream inpStr;
+
+	public SensorXMLReader(InputStream input)
 	{
-		String filename = "/models/sensors/"+c.getFolderName()+"/"+devname+".xml";
-		
-        File f = new File(filename);
-
-        //get all the files from a directory
-
-        if(f.exists()) 
-        {        	
-        	System.out.println(filename); 
-        }        
-		
-		System.out.println(filename);
-		this.fName=filename;
 		identInfo = new SensorIdent();
 		i2cInf = null;
 		spiInf = null;
 		outputLst = new ArrayList<SensorOutput>();
 		controlLst = new ArrayList<SensorControl>();
+		this.inpStr = input;
 	}
-	
+
 	private void readIdentification(Node identNode)
 	{
 		if(identNode!=null)
@@ -131,7 +118,7 @@ public class SensorXMLReader
         // if successfully read from file
         if(addr!=-1 && active!=-1)
         {
-        	i2cInf.addDeviceAddr((byte)(addr&0xff), (active==1));
+        	i2cInf.addDeviceAddr((byte) (addr & 0xff), (active == 1));
         }
 	}
 	// Part of communication info
@@ -410,50 +397,50 @@ public class SensorXMLReader
 			//TODO: Log
 		}		
 	}
-	
+
 	public void readFile() throws SAXException, IOException, ParserConfigurationException, URISyntaxException
 	{
-	    DocumentBuilderFactory factory = 
-		        DocumentBuilderFactory.newInstance();
+		DocumentBuilderFactory factory =
+				DocumentBuilderFactory.newInstance();
 		//Get the DOM Builder
-	    DocumentBuilder builder = factory.newDocumentBuilder();
-	    //Load and Parse the XML document
-	    //document contains the complete XML as a Tree.
-	    InputStream xmlFile = getClass().getResourceAsStream(this.fName);
-	    //File xmlFile = new File(this.fName);
-	    
-	    Document curDocument = 
-	      builder.parse(xmlFile);
-	    
-	    NodeList nodeList = curDocument.getDocumentElement().getChildNodes();
-		
-	    for (int i = 0; i < nodeList.getLength(); i++) {
-	        //We have encountered an <device> tag.
-	        Node node = nodeList.item(i);
-	        if (node instanceof Element)
-	        {
-	        	String nodeName = node.getNodeName();
-	        	switch(nodeName)
-	        	{
-	        		case "Identification":
-	        			this.readIdentification(node);
-	        			break;
-	        		case "Communication":
-	        			this.readCommunication(node);
-	        			break;
-	        		case "Data":
-	        			this.readData(node);
-	        			break;
-	        		case "DeviceControl":
-	        			this.readDeviceControl(node);
-	        			break;
-	        		default:
-	        			break;
-	        	}
-	        }
-	    }	
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		//Load and Parse the XML document
+		//document contains the complete XML as a Tree.
+		InputStream xmlFile = this.inpStr;
+		//File xmlFile = new File(this.fName);
+
+		Document curDocument =
+				builder.parse(xmlFile);
+
+		NodeList nodeList = curDocument.getDocumentElement().getChildNodes();
+
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			//We have encountered an <device> tag.
+			Node node = nodeList.item(i);
+			if (node instanceof Element)
+			{
+				String nodeName = node.getNodeName();
+				switch(nodeName)
+				{
+					case "Identification":
+						this.readIdentification(node);
+						break;
+					case "Communication":
+						this.readCommunication(node);
+						break;
+					case "Data":
+						this.readData(node);
+						break;
+					case "DeviceControl":
+						this.readDeviceControl(node);
+						break;
+					default:
+						break;
+				}
+			}
+		}
 	}
-	
+
 	public SensorIdent getIdentInfo() {
 		return identInfo;
 	}
@@ -488,7 +475,7 @@ public class SensorXMLReader
 	public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException, URISyntaxException  
 	{		
 		/* TEST */
-		SensorXMLReader reader = new SensorXMLReader(SensorCategory.ACC, "ADXL345");
-		reader.readFile();
+		//SensorXMLReader reader = new SensorXMLReader(SensorCategory.ACC, "ADXL345");
+		//reader.readFile();
 	}
 }

@@ -1,23 +1,34 @@
 package paddlefish.run;
 
+import android.content.res.AssetManager;
+import android.util.Log;
+
+import org.xml.sax.SAXException;
+
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import paddlefish.def.SensorCategory;
 import paddlefish.io.SensorXMLReader;
 import paddlefish.sensor.*;
 
 public class State {
+    /* Only this class will access and read assets*/
+	private AssetManager astMng;
 	// Keeps currently active sensors in the list
 	private ArrayList<GenSensor> activeSensLst;
 	// number of sensors currently in the system
 	private int sensCnt;
+    // all sensor files in the assets
+    private String[] sensorNameLst;
+
 	// Return active sensor list
-
-	// TODO: Do proper handling for folder names: -> Ozan!!!
-	private static String windowsProjFolder = "D:\\Others\\PaddleFish\\paddlefish";
-
-	
+    /*
 	public ArrayList<SensorXMLReader> getAvailableSensorList()
 	{
 		ArrayList<SensorXMLReader> availableSensors = null;
@@ -35,30 +46,52 @@ public class State {
 		
 		return availableSensors;
 	}
-	
-	public State()
-	{
+	*/
+	public State(AssetManager ast) throws SAXException, ParserConfigurationException, URISyntaxException {
 		sensCnt = 0;
 		activeSensLst = new ArrayList<GenSensor>();
+
+        this.astMng = ast;
+
+        try
+        {
+            sensorNameLst = astMng.list("models");
+            Log.d("Sensor names are read",sensorNameLst[0]);
+            getDevicesOfCat(SensorCategory.GYRO);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
 	}
 
 	public ArrayList<GenSensor> getActiveSensLst() {
 		return this.activeSensLst;
 	}
 
-	public ArrayList<String> getDevicesOfCat(SensorCategory cat) {
+    // Reorganized for Assets folder
+	public ArrayList<String> getDevicesOfCat(SensorCategory cat) throws SAXException, ParserConfigurationException, URISyntaxException {
 		ArrayList<String> devNames = new ArrayList<String>();
-		String fpath = windowsProjFolder + "\\models\\sensors\\"
-				+ cat.getFolderName();
-		File folder = new File(fpath);
-		File[] files = folder.listFiles();
-		for (File file : files) {
-			if (file.isFile()) {
-				devNames.add(file.getName().substring(0,
-						file.getName().length() - 4));
-			}
-		}
-		return devNames;
+        // sensorNameLst içerisindeki xml leri okuyup kategorilerine göre ayırıyoruz
+        InputStream input;
+
+        if(this.sensorNameLst.length>0) {
+            // for all asset files
+            for(String senName:this.sensorNameLst)
+            {
+                try
+                {
+                    input = this.astMng.open("models/"+senName);
+                    SensorXMLReader newSensInfo = new SensorXMLReader(input);
+                    newSensInfo.readFile();
+                    String desc = newSensInfo.getIdentInfo().descr;
+                    Log.d("State get Category", desc);
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return devNames;
 	}
 
 	/*
@@ -67,12 +100,15 @@ public class State {
 	 */
 	public GenSensor addDevice(String devname) throws Exception {
 		GenSensor newSensor = null;
-		switch (devname) {
+		switch (devname) 
+		{
 		case "ADXL345":
 			newSensor = new ADXL345();
+            newSensor.initFromXML(this.astMng.open("models/ADXL345"));
 			break;
 		case "L3GD20":
 			newSensor = new L3GD20();
+            newSensor.initFromXML(this.astMng.open("models/L3GD20"));
 			break;
 		case "Test":
 			newSensor = new TestSensor();
@@ -95,29 +131,5 @@ public class State {
 			}
 		}
 		return newSensor;
-	}
-
-	public static void main(String[] args) throws Exception {
-		State stTester = new State();
-		//ArrayList<String> tStr = stTester.getDevicesOfCat(SensorCategory.ACC);
-		GenSensor testSens = stTester.addDevice("Test");
-		/*
-		 * GenSensor testSens = stTester.addDevice("ADXL345");
-		 * 
-		 * if(testSens!=null) {
-		 * System.out.println("Success! "+testSens.getCommId()+ " "+
-		 * testSens.getIdentInfo().descr); } else {
-		 * System.out.println("Ooops :( "); }
-		 * 
-		 * try {Thread.sleep(2000);} catch (InterruptedException ie) {} // Wait
-		 * for communication channel is up
-		 * 
-		 * GenSensor testSens2 = stTester.addDevice("ADXL345");
-		 * if(testSens2!=null) {
-		 * System.out.println("Success! "+testSens2.getCommId()+ " "+
-		 * testSens2.getIdentInfo().descr); } else {
-		 * System.out.println("Ooops :( "); }
-		 */
-		System.exit(0);
 	}
 }
