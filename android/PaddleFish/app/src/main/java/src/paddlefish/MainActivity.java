@@ -50,14 +50,13 @@ public class MainActivity extends AppCompatActivity
     public static SensorListAdapter listAdapter;
     private FloatingActionButton fab;
     private ChooseSensorCategoryDialog dialog;
-    public State myState;
 
     Bluetooth btDevice = null;
 
     private static boolean bluetooth_disable = true;
 
     // State holder
-    private State curSt;
+    public static State curSt;
 
     private final static int REQUEST_ENABLE_BT = 1;
 

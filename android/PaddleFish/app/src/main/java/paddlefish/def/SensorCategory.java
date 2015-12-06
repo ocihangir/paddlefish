@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 /* This enum defines constants for sensor categories this project implements*/
 public enum SensorCategory {
-	GYRO ("gyroscope"),
-	TEMP ("temperature"),
-	ACC ("accelerometer"),
-	COMPASS("compass"),
+	GYRO ("Gyroscope"),
+	TEMP ("Temperature"),
+	ACC ("Accelerometer"),
+	COMPASS("Compass"),
 	UNK(""),
 	;
 	// folder name under models/sensors	

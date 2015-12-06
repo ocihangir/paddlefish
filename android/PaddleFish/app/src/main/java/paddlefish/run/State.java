@@ -68,7 +68,7 @@ public class State {
 					if(newSensInfo.getIdentInfo().categ==cat)
 					{
 						// Add to device list
-						devNames.add(senName);
+						devNames.add(senName.substring(0,senName.length()-4));
 					}
 				}
 				catch (IOException e) {
@@ -89,11 +89,11 @@ public class State {
 		{
 		case "ADXL345":
 			newSensor = new ADXL345();
-            newSensor.initFromXML(this.astMng.open("models/ADXL345"));
+            newSensor.initFromXML(this.astMng.open("models/ADXL345.xml"));
 			break;
 		case "L3GD20":
 			newSensor = new L3GD20();
-            newSensor.initFromXML(this.astMng.open("models/L3GD20"));
+            newSensor.initFromXML(this.astMng.open("models/L3GD20.xml"));
 			break;
 		case "Test":
 			newSensor = new TestSensor();
@@ -103,6 +103,7 @@ public class State {
 			System.out.println("Devname does not exist");
 			break;
 		}
+		/*
 		if (newSensor != null && !devname.equals("Test")) {
 			// assign a commId (important to send & receive messages from queue)
 			newSensor.setCommId(sensCnt++);
@@ -115,6 +116,7 @@ public class State {
 				System.out.println(" Sensor is not physically valid !!");
 			}
 		}
+		*/
 		return newSensor;
 	}
 }

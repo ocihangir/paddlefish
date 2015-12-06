@@ -87,10 +87,10 @@ public class SensorSettingsActivity extends AppCompatActivity {
             for (ControlInput cInput : control.cInputs) {
                 for (ControlInputValue value : cInput.inValues) {
                     if (control.type == ControlType.MEASURE) {
-                        devControlMeasureActivity.setChecked((boolean) value.value);
+                        devControlMeasureActivity.setChecked(Boolean.valueOf(value.value.toString()));
                         Log.d("baq", value.value + "");
                     }else if(control.type == ControlType.POWERDOWN) {
-                        devControlPowerDown.setChecked(true);
+                        devControlPowerDown.setChecked(Boolean.valueOf(value.value.toString()));
                         Log.d("baq",value.value+"");
                     }else if(control.type == ControlType.WAKEUP){
                         frequencies.add(value.value);
