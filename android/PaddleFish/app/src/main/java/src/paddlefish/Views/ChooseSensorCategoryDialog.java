@@ -37,7 +37,7 @@ public class ChooseSensorCategoryDialog extends Dialog implements AdapterView.On
         ArrayList<SensorItem> items = new ArrayList<SensorItem>();
         for (SensorCategory cat:SensorCategory.values())
         {
-            if(!cat.getFolderName().isEmpty())
+            // if(!cat.getFolderName().isEmpty())
             {
                 SensorItem item = new SensorItem();
                 item.categoryName = cat.getFolderName();
