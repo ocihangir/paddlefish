@@ -1,17 +1,21 @@
 package paddlefish.hal;
 
+import android.bluetooth.BluetoothDevice;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import java.util.concurrent.Semaphore;
 
+import paddlefish.hal.bluetooth_interface.Bluetooth;
+import paddlefish.hal.bluetooth_interface.IBluetoothHandler;
 import paddlefish.protocol.CommConstants;
 
 
 /*Singleton class Pattern is used*/
 /*Observer Pattern is used*/
-public class HAL implements CommRxInterface {
+public class HAL implements CommRxInterface,IBluetoothHandler {
 	private static HAL instance = null;
 	Bluetooth blueComm;
 	private List<CommControllerInterface> dataReceiverList = new ArrayList<CommControllerInterface>();
@@ -25,8 +29,8 @@ public class HAL implements CommRxInterface {
 	{
 		if (blueComm == null)
 		{
-			blueComm = new Bluetooth();
-			blueComm.addReceiver(this);
+			blueComm = Bluetooth.getInstance();
+			blueComm.addBluetoothHandler(this);
 		}
 	}
 	
@@ -62,10 +66,16 @@ public class HAL implements CommRxInterface {
 	{
 		//usbComm.connect(port,baud);
 	}
+
+	public void connect(BluetoothDevice device)
+	{
+		blueComm.connect(device);
+	}
 	
 	public void disconnect() throws Exception
 	{
 		//usbComm.disconnect();
+		blueComm.disconnect();
 	}
 	
 	public boolean isConnected()
@@ -79,12 +89,9 @@ public class HAL implements CommRxInterface {
 			try {
 				mutex.acquire();
 				try {
-					/*try {
-					usbComm.sendData(data);
-					} catch (SerialPortException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}*/
+						// usbComm.sendData(data);
+						blueComm.sendData(data);
+
 				} finally {
 					mutex.release();
 				}
@@ -95,51 +102,13 @@ public class HAL implements CommRxInterface {
 			
 		
 	}
-	
-	public byte[] rxData() throws Exception
-	{		
-		byte[] resBuffer = new byte[1024];
-		int len = 0;
-		int prev_len = 0;
-		boolean loop = true;
-		do 
-		{
-			byte[] buffer = { 0x00 }; //usbComm.receiveData(2000);
-			len = buffer.length;
-			
-			System.arraycopy(buffer, 0, resBuffer, prev_len, len);
-			prev_len+=len;
-			
-			if (prev_len>0)
-			{
-				if (resBuffer[prev_len-1] == 0x0C)
-				{
-					loop = false;
-				}
-				
-				if (resBuffer[prev_len-1] == 0x0E)
-				{
-					loop = false;
-					throw new Exception("I2C Error! Check if I2C device connected properly. Slow down the I2C speed from Advanced tab.");
-					// TODO : Create an exception class for I2C
-				}
-			}
-		} while( loop );
-		byte[] res = new byte[prev_len];
-		System.arraycopy(resBuffer, 0, res, 0, prev_len);
-		return res;
-	}
+
 
 	public void close()
 	{
-		/*if(this.usbComm!=null)
-			try {
-				this.usbComm.close();
-			} catch (SerialPortException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		else*/
+		if(this.blueComm!=null)
+				this.blueComm.close();
+		else
 			System.out.println("No UsbComm available");
 	}
 
@@ -222,5 +191,19 @@ public class HAL implements CommRxInterface {
 				break;
 			}
 		} while(rxBufferLength>0);
+	}
+
+	@Override
+	public void discoveryHandler(BluetoothDevice device) {
+
+	}
+
+	@Override
+	public void receiveHandler(byte[] message, int len) {
+		byte[] msg = new byte[len];
+		System.arraycopy(message, 0, msg, 0, len);
+		commReceiver(msg);
+        //System.out.print("Incoming bytes : ");
+        //System.out.println(msg[0]);
 	}
 }

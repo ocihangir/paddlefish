@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.jar.Manifest;
 
 import paddlefish.def.SensorCategory;
+import paddlefish.hal.bluetooth_interface.Bluetooth;
+import paddlefish.protocol.CommController;
 import paddlefish.run.State;
 import paddlefish.sensor.GenSensor;
 import src.paddlefish.ArrayAdapters.SensorListAdapter;
@@ -41,10 +43,9 @@ public class MainActivity extends AppCompatActivity {
     private ChooseSensorCategoryDialog dialog;
     public State myState;
 
-    BluetoothAdapter mBlueToothAdapter = null;
+    Bluetooth btDevice = null;
 
     private final static int REQUEST_ENABLE_BT = 1;
-    private final static int REQUEST_STATE_CHANGE_BT = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,23 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         myState = new State();
+
+        btDevice = Bluetooth.getInstance();
+
+        btDevice.init(this);
+
+        CommController commController = null;
+
+        try {
+            commController = CommController.getInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        ArrayList<BluetoothDevice> pairedDevices = btDevice.getPairedDeviceList();
+
+        btDevice.connect(pairedDevices.get(0));
+
 
 
         // BGozde
@@ -118,5 +136,26 @@ public class MainActivity extends AppCompatActivity {
         }
         return state;
     }*/
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        btDevice.close();
+    }
+
+    /*
+            onActivityResult handler is used to track Bluetooth turn on status.
+            If the user answers no to enable activity, we will handle it here
+            and show user a message, perhaps exit the application.
+         */
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        if ( requestCode == REQUEST_ENABLE_BT ) {
+            if (resultCode != RESULT_OK) {
+                // Warn user or kill the app
+                Toast.makeText(getApplicationContext(), "You must enable Bluetooth to use this application.", Toast.LENGTH_LONG).show();
+                // System.exit(0);
+            }
+        }
+    }
 
 }
