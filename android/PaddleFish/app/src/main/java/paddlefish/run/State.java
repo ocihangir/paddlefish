@@ -27,26 +27,6 @@ public class State {
     // all sensor files in the assets
     private String[] sensorNameLst;
 
-	// Return active sensor list
-    /*
-	public ArrayList<SensorXMLReader> getAvailableSensorList()
-	{
-		ArrayList<SensorXMLReader> availableSensors = null;
-		
-		// TODO : automatize sensor listing process
-		
-		SensorCategory sensCategory = null;
-		// ArrayList<String> categories = sensCategory.getCategoryList();
-		
-		SensorXMLReader xmlReader = new SensorXMLReader(sensCategory.getCategory("Accelerometer"),"ADXL345");
-		availableSensors.add(xmlReader);
-		
-		xmlReader = new SensorXMLReader(sensCategory.getCategory("Gyroscope"),"L3GD20");
-		availableSensors.add(xmlReader);
-		
-		return availableSensors;
-	}
-	*/
 	public State(AssetManager ast) throws SAXException, ParserConfigurationException, URISyntaxException {
 		sensCnt = 0;
 		activeSensLst = new ArrayList<GenSensor>();
@@ -57,7 +37,6 @@ public class State {
         {
             sensorNameLst = astMng.list("models");
             Log.d("Sensor names are read",sensorNameLst[0]);
-            getDevicesOfCat(SensorCategory.GYRO);
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -68,30 +47,36 @@ public class State {
 		return this.activeSensLst;
 	}
 
-    // Reorganized for Assets folder
+	// Reorganized for Assets folder
+	// SensorCategory cat: Category that UI asks
+	// ArrayList<String> devNames : Return asset file names from category cat
 	public ArrayList<String> getDevicesOfCat(SensorCategory cat) throws SAXException, ParserConfigurationException, URISyntaxException {
 		ArrayList<String> devNames = new ArrayList<String>();
-        // sensorNameLst içerisindeki xml leri okuyup kategorilerine göre ayırıyoruz
-        InputStream input;
-
-        if(this.sensorNameLst.length>0) {
-            // for all asset files
-            for(String senName:this.sensorNameLst)
-            {
-                try
-                {
-                    input = this.astMng.open("models/"+senName);
-                    SensorXMLReader newSensInfo = new SensorXMLReader(input);
-                    newSensInfo.readFile();
-                    String desc = newSensInfo.getIdentInfo().descr;
-                    Log.d("State get Category", desc);
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return devNames;
+		InputStream input;
+		if(this.sensorNameLst.length>0) {
+			// for all asset files
+			for(String senName:this.sensorNameLst)
+			{
+				try
+				{
+					input = this.astMng.open("models/"+senName);
+					SensorXMLReader newSensInfo = new SensorXMLReader(input);
+					newSensInfo.readFile();
+					String desc = newSensInfo.getIdentInfo().descr;
+					Log.d("State get Category", desc);
+					// if category is the same
+					if(newSensInfo.getIdentInfo().categ==cat)
+					{
+						// Add to device list
+						devNames.add(senName);
+					}
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return devNames;
 	}
 
 	/*
