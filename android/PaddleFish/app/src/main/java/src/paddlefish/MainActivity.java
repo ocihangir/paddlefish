@@ -54,6 +54,8 @@ public class MainActivity extends AppCompatActivity
 
     Bluetooth btDevice = null;
 
+    private static boolean bluetooth_disable = true;
+
     // State holder
     private State curSt;
 
@@ -78,6 +80,7 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
         // EGozde
+        if (!bluetooth_disable) {
         btDevice = Bluetooth.getInstance();
 
         btDevice.init(this);
@@ -93,7 +96,7 @@ public class MainActivity extends AppCompatActivity
         ArrayList<BluetoothDevice> pairedDevices = btDevice.getPairedDeviceList();
 
         btDevice.connect(pairedDevices.get(0));
-
+        }
 
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
