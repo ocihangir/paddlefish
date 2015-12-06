@@ -12,6 +12,7 @@
         <option name="SELECTED_TEST_ARTIFACT" value="_android_test_" />
         <option name="ASSEMBLE_TASK_NAME" value="assembleDebug" />
         <option name="COMPILE_JAVA_TASK_NAME" value="compileDebugSources" />
+        <option name="SOURCE_GEN_TASK_NAME" value="generateDebugSources" />
         <option name="ASSEMBLE_TEST_TASK_NAME" value="assembleDebugAndroidTest" />
         <option name="COMPILE_JAVA_TEST_TASK_NAME" value="compileDebugAndroidTestSources" />
         <afterSyncTasks>
