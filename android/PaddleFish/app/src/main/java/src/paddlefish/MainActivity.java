@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        myState = new State();
 
         // BGozde
         AssetManager assetManager = getResources().getAssets();
