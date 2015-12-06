@@ -6,17 +6,21 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.AssetManager;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.jar.Manifest;
 
 import paddlefish.def.SensorCategory;
 import paddlefish.run.State;
@@ -51,6 +55,17 @@ public class MainActivity extends AppCompatActivity {
         myState = new State();
 
 
+        // BGozde
+        AssetManager ast = getApplicationContext().getAssets();
+        try
+        {
+            final String[] names = ast.list("model");
+            Toast.makeText(MainActivity.this,names.length+"",Toast.LENGTH_SHORT).show();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
 
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -85,7 +100,8 @@ public class MainActivity extends AppCompatActivity {
     public void dissmissDialogAndAddItem(SensorItem sensorItem) {
         dialog.dismiss();
         try {
-            GenSensor sensor = myState.addDevice(sensorItem.sensorName);
+            //GenSensor sensor = myState.addDevice(sensorItem.sensorName);
+            GenSensor sensor = myState.addDevice("Test");
             GenSensorItem item = new GenSensorItem();
             item.sensorItem = sensorItem;
             item.genSensor = sensor;
