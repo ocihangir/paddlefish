@@ -152,7 +152,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        btDevice.close();
+        if(!bluetooth_disable)
+            btDevice.close();
     }
 
     /*
